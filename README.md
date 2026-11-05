@@ -6,6 +6,7 @@
 [![Cloudflare Workers & D1](https://img.shields.io/badge/Cloudflare-Workers%20%26%20D1-orange?logo=cloudflare)](https://workers.cloudflare.com/)
 [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
 [![Tests](https://img.shields.io/badge/Jest-420%2B%20Passing-brightgreen?logo=jest)](https://jestjs.io/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A modern, full-stack equipment inventory, checkout, reservation, and asset tracking platform.
 
@@ -335,4 +336,4 @@ inventory_tracker/
 
 ## License
 
-MIT License. Open source equipment and inventory tracking system.
+Distributed under the [MIT License](LICENSE).
