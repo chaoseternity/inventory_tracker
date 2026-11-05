@@ -3,12 +3,13 @@ import { authConfig } from "@/auth.config";
 import { upsertUser, getUserByEmail } from "./db";
 import type { Role } from "./types";
 
-/** Microsoft sign-ins are restricted to school accounts. Google is unrestricted for now. */
-export const MICROSOFT_ALLOWED_EMAIL_DOMAIN = "nushigh.edu.sg";
+/** Optional domain restriction for Microsoft sign-ins (set MICROSOFT_ALLOWED_DOMAIN in env, or empty to allow all). */
+export const MICROSOFT_ALLOWED_EMAIL_DOMAIN = process.env.MICROSOFT_ALLOWED_DOMAIN || "";
 
 const GUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export function isAllowedMicrosoftEmail(email: string): boolean {
+  if (!MICROSOFT_ALLOWED_EMAIL_DOMAIN) return true;
   return email.trim().toLowerCase().endsWith(`@${MICROSOFT_ALLOWED_EMAIL_DOMAIN}`);
 }
 

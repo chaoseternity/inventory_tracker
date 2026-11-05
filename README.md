@@ -1,4 +1,4 @@
-# Inventory Tracker — NUS High Media Club Equipment & Operations Hub
+# Inventory Tracker — Full-Stack Equipment & Asset Management
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.3-black?logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://react.dev/)
@@ -7,9 +7,9 @@
 [![Tailwind CSS v4](https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
 [![Tests](https://img.shields.io/badge/Jest-420%2B%20Passing-brightgreen?logo=jest)](https://jestjs.io/)
 
-A modern, full-stack equipment inventory, checkout, reservation, and field logistics platform built specifically for the **NUS High Media Club** ([nushmedia.app](https://nushmedia.app)). 
+A modern, full-stack equipment inventory, checkout, reservation, and asset tracking platform.
 
-Inventory Tracker manages high-value production gear (cinema cameras, wireless audio kits, lenses, lighting, accessories, and laptops) with automated audit workflows, peer-to-peer equipment handovers, dedicated kiosk NFC scanning, interactive storage mapping, and an AI-powered Standard Operating Procedure (SOP) assistant.
+Inventory Tracker manages hardware, production gear, cameras, audio kits, lenses, tools, accessories, and laptops with automated audit workflows, peer-to-peer equipment handovers, dedicated kiosk NFC scanning, interactive storage mapping, and an AI-powered Standard Operating Procedure (SOP) assistant.
 
 ---
 
@@ -36,20 +36,20 @@ Inventory Tracker manages high-value production gear (cinema cameras, wireless a
 
 - **Equipment Catalog & Asset Tracking**: Complete equipment directory with category filters, condition statuses, storage locations, serial numbers, and custom tag hierarchies.
 - **Checkouts & Self-Service Returns**: Fast checkouts with due dates, overdue detection, automatic email return reminders, and self-service return workflows.
-- **Peer-to-Peer Handovers (`HD-XXXXXX`)**: Transfer custody directly between crew members on location via single-use 6-digit claim codes or QR codes without returning gear to the central locker.
-- **Equipment Reservations & Conflict Detection**: Pre-book gear for school events, media coverage, and training sessions with overlap checking.
-- **Interactive Storage Map (`/dashboard/map`)**: Visual 2D grid editor of studio storage cabinets, shelves, and lockers, showing which gear is stored in which slot.
-- **Stock Audits & Roll Calls (`/dashboard/audit`)**: Live multi-user stock verification allowing admins to scan all assets across the club with real-time "exists vs. missing" tallies.
-- **Event Crew Deployments & Rehearsals**: Group equipment bundles by event sections (e.g., Live Stream, Photography, Roaming Audio) with RSVP deployment invites.
+- **Peer-to-Peer Handovers (`HD-XXXXXX`)**: Transfer custody directly between team members on location via single-use 6-digit claim codes or QR codes without returning gear to the central locker.
+- **Equipment Reservations & Conflict Detection**: Pre-book gear for upcoming events, shoots, and sessions with automated overlap checking.
+- **Interactive Storage Map (`/dashboard/map`)**: Visual 2D grid editor of storage cabinets, shelves, and lockers, showing which gear is stored in which slot.
+- **Stock Audits & Roll Calls (`/dashboard/audit`)**: Live multi-user stock verification allowing admins to scan all assets with real-time "exists vs. missing" tallies.
+- **Event Team Deployments & Rehearsals**: Group equipment bundles by event sections (e.g., Live Stream, Photography, Audio) with RSVP deployment invites.
 - **AI-Powered SOP Assistant**: Powered by Google Gemini (`@google/generative-ai`), parses uploaded technical SOPs (PDF/Word) and provides multimodal assistant guidance for gear operations and troubleshooting.
-- **Printable Barcodes & Asset Tags**: Generates standard 1D Code128 asset labels and 2D QR codes ready for printing and pasting onto flight cases.
-- **Progressive Web App (PWA) & Offline Resilience**: Service worker support with background synchronization (`lib/offlineSync.ts`) to queue transactions during weak school Wi-Fi connectivity.
+- **Printable Barcodes & Asset Tags**: Generates standard 1D Code128 asset labels and 2D QR codes ready for printing and pasting onto equipment.
+- **Progressive Web App (PWA) & Offline Resilience**: Service worker support with background synchronization (`lib/offlineSync.ts`) to queue transactions during weak Wi-Fi connectivity.
 
 ---
 
 ## Hardware & Scanner Integration
 
-Inventory Tracker is built from the ground up to support physical hardware scanners used during club productions:
+Inventory Tracker is built from the ground up to support physical hardware scanners:
 
 1. **In-Browser Smartphone Camera Scanner**:
    - Zero-delay transparent `onPointerDown` tap layer for instant tap-to-focus.
@@ -69,7 +69,7 @@ Inventory Tracker is built from the ground up to support physical hardware scann
 - **Framework**: [Next.js 16](https://nextjs.org/) (App Router, Turbopack, React 19, TypeScript 5)
 - **Styling**: [Tailwind CSS v4](https://tailwindcss.com/) with Radix / Base UI and [Lucide Icons](https://lucide.dev/)
 - **Authentication**: [NextAuth.js v5](https://authjs.dev/) supporting:
-  - Microsoft Entra ID / Azure AD (school `@nushigh.edu.sg` accounts)
+  - Microsoft Entra ID / Azure AD (organizational accounts)
   - Google OAuth
 - **Database Layer**:
   - **Edge / Serverless**: [Cloudflare D1](https://developers.cloudflare.com/d1/) (SQLite distributed across Cloudflare edge) via OpenNext.
@@ -137,13 +137,13 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 | Variable | Description | Required? | Example / Default |
 | :--- | :--- | :---: | :--- |
 | `AUTH_SECRET` | Secret key used by NextAuth to sign session tokens. Generate with `openssl rand -base64 32`. | **Yes** | `d4e5f...` |
-| `AUTH_URL` | Canonical URL of your deployment. | **Yes** | `http://localhost:3000` (Local) / `https://nushmedia.app` (Prod) |
+| `AUTH_URL` | Canonical URL of your deployment. | **Yes** | `http://localhost:3000` (Local) / `https://inventory-tracker.example.com` (Prod) |
 | `AZURE_AD_CLIENT_ID` | Microsoft Entra ID App registration Client ID. | Optional | `00000000-0000-0000-0000-000000000000` |
 | `AZURE_AD_CLIENT_SECRET` | Microsoft Entra ID App registration Client Secret. | Optional | `secret...` |
-| `AZURE_AD_TENANT_ID` | Microsoft 365 Tenant ID (restricts sign-in to `@nushigh.edu.sg`). | Optional | `common` or tenant GUID |
+| `AZURE_AD_TENANT_ID` | Microsoft 365 Tenant ID. | Optional | `common` or tenant GUID |
 | `GOOGLE_CLIENT_ID` | Google Cloud Console OAuth Client ID. | Optional | `12345...apps.googleusercontent.com` |
 | `GOOGLE_CLIENT_SECRET` | Google Cloud Console OAuth Client Secret. | Optional | `GOCSPX-...` |
-| `ADMIN_EMAILS` | Comma-separated list of emails automatically granted `admin` role on login. | **Yes** | `admin@nushigh.edu.sg,teacher@nushigh.edu.sg` |
+| `ADMIN_EMAILS` | Comma-separated list of emails automatically granted `admin` role on login. | **Yes** | `admin@example.com` |
 | `GEMINI_API_KEY` | Google Gemini API key for AI SOP chat assistant. | Optional | `AIzaSy...` |
 | `GEMINI_MODEL` | Primary Gemini model ID. | Optional | `gemini-3.5-flash-lite` |
 | `SMTP_HOST` | SMTP server host for checkout reminder emails. | Optional | `smtp.gmail.com` |
@@ -161,20 +161,20 @@ Inventory Tracker enforces three user permission tiers:
 | Role | Access Level | Description |
 | :--- | :---: | :--- |
 | **`viewer`** | Read Only | Can browse equipment catalog, view item availability, and check public schedules. Cannot checkout gear. |
-| **`verified`** | Student / Crew | Can checkout equipment, initiate peer handovers, submit reservations, and use the AI SOP assistant. |
+| **`verified`** | Member / Operator | Can checkout equipment, initiate peer handovers, submit reservations, and use the AI SOP assistant. |
 | **`admin`** | Administrator | Full access: add/edit/delete equipment, approve checkouts, manage users, perform stock audits, edit storage maps, and view audit logs. |
 
 ### Promoting / Demoting Users via CLI
 To change a user's role directly in the database:
 ```bash
 # Grant Admin access
-npm run set-role -- --email=student@nushigh.edu.sg --role=admin
+npm run set-role -- --email=admin@example.com --role=admin
 
 # Set to Verified Member
-npm run set-role -- --email=student@nushigh.edu.sg --role=verified
+npm run set-role -- --email=user@example.com --role=verified
 
 # Demote to Viewer
-npm run set-role -- --email=student@nushigh.edu.sg --role=viewer
+npm run set-role -- --email=user@example.com --role=viewer
 ```
 *(Note: Users must have logged in at least once so their profile record exists in the database).*
 
@@ -193,7 +193,7 @@ npm run db:migration:remote
 ```
 
 ### Seeding Data
-The seed generator creates laptops, SD cards, cameras, and checkout history:
+The seed generator creates sample assets and checkout history:
 ```bash
 # Generate seed SQL script
 npm run seed
@@ -208,7 +208,7 @@ npm run db:seed:local
 
 ## NFC Kiosk Station Setup
 
-For dedicated equipment sign-out desks using an attached USB NFC card reader (e.g. at student lockers):
+For dedicated equipment sign-out desks using an attached USB NFC card reader:
 
 1. Connect the NFC card reader to the station laptop.
 2. Run the dedicated kiosk script:
@@ -216,7 +216,7 @@ For dedicated equipment sign-out desks using an attached USB NFC card reader (e.
    launch-nfc-station.bat
    ```
    *(Or navigate directly to `/dashboard/nfc` in Google Chrome or Microsoft Edge).*
-3. Students can tap their student card or registered NFC fob to immediately pull up their active loans or check out selected gear.
+3. Users can tap their physical card or registered NFC fob to immediately pull up their active loans or check out selected gear.
 
 ---
 
@@ -273,7 +273,7 @@ The production deployment runs as an edge-rendered serverless application on Clo
 
 ### Vercel + PostgreSQL (Alternative)
 
-If hosting on Vercel with a standard PostgreSQL database (e.g. self-hosted on a Synology NAS or Neon/Supabase):
+If hosting on Vercel with a standard PostgreSQL database (e.g. self-hosted on a NAS or Neon/Supabase):
 1. Switch to the [`vercel`](https://github.com/chaoseternity/inventory-tracker/tree/vercel) branch:
    ```bash
    git checkout vercel
@@ -293,7 +293,7 @@ inventory_tracker/
 │   │   ├── audit/              # Stock roll-call & audit scanning APIs
 │   │   ├── checkout/           # Checkouts & return processing
 │   │   ├── equipment/          # Equipment CRUD & batch actions
-│   │   ├── events/             # Production events & gear allocations
+│   │   ├── events/             # Events & asset allocations
 │   │   ├── handover/           # Peer-to-peer handover verification
 │   │   ├── nfc/                # NFC card assignment & card tap handling
 │   │   ├── reservations/       # Equipment booking & conflict engine
@@ -335,4 +335,4 @@ inventory_tracker/
 
 ## License
 
-Maintained for and by the **NUS High Media Club**. All rights reserved.
+MIT License. Open source equipment and inventory tracking system.

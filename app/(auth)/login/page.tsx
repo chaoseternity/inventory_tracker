@@ -36,7 +36,7 @@ function GoogleIcon() {
 
 
 const ERROR_MESSAGES: Record<string, string> = {
-  MicrosoftDomain: "Microsoft sign-in is only available for @nushigh.edu.sg accounts.",
+  MicrosoftDomain: "Microsoft sign-in is not authorized for this account domain.",
   AccessDenied: "Sign-in was denied. Please try a different account.",
 };
 
