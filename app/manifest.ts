@@ -2,9 +2,9 @@ import type { MetadataRoute } from "next";
 
 export default function manifest(): MetadataRoute.Manifest {
   return {
-    name: "Media Club - NFC Station",
-    short_name: "Media Club NFC",
-    description: "Official Media Club equipment checkout & return kiosk workstation",
+    name: "Inventory Tracker - NFC Station",
+    short_name: "Inventory Tracker",
+    description: "Equipment checkout & return kiosk workstation",
     start_url: "/dashboard/nfc",
     display: "standalone",
     background_color: "#000000",
