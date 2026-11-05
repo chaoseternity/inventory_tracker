@@ -54,7 +54,7 @@ describe("lib/email", () => {
 
   test("formats event times in the app time zone (SGT), not the Worker's UTC", async () => {
     configureSmtp();
-    process.env.AUTH_URL = "https://mediahub.example.org";
+    process.env.AUTH_URL = "https://tracker.example.org";
     jest.spyOn(console, "log").mockImplementation(() => {});
 
     const result = await sendDeploymentInvitationEmail({
@@ -69,7 +69,7 @@ describe("lib/email", () => {
     expect(html).toContain("Thu, 1 Oct 2026, 18:00 – 22:00");
     expect(html).toContain("Wed, 30 Sept 2026, 19:30 – 21:00");
     expect(html).not.toContain("10:00");
-    expect(html).toContain(`https://mediahub.example.org/rsvp/${TOKEN}?action=confirm`);
+    expect(html).toContain(`https://tracker.example.org/rsvp/${TOKEN}?action=confirm`);
   });
 
   test("formatEmailTimeRange repeats the end date only when it differs", () => {
@@ -114,7 +114,7 @@ describe("lib/email", () => {
 
     test("skips a localhost candidate when a public origin is available", () => {
       process.env.AUTH_URL = "http://localhost:8787";
-      expect(resolveEmailBaseUrl("https://mediahub.example.org")).toBe("https://mediahub.example.org");
+      expect(resolveEmailBaseUrl("https://tracker.example.org")).toBe("https://tracker.example.org");
       expect(resolveEmailBaseUrl("http://localhost:8787")).toBe("http://localhost:8787");
       expect(resolveEmailBaseUrl("javascript:alert(1)")).toBe("http://localhost:8787");
     });
@@ -125,7 +125,7 @@ describe("lib/email", () => {
       jest.spyOn(console, m).mockImplementation(() => {})
     );
 
-    const result = await sendDeploymentInvitationEmail({ ...baseInvite, origin: "https://mediahub.example.org" });
+    const result = await sendDeploymentInvitationEmail({ ...baseInvite, origin: "https://tracker.example.org" });
 
     expect(result).toMatchObject({ success: false, skipped: true, reason: "SMTP not configured" });
     expect(result.previewUrl).toBeUndefined();

@@ -1,5 +1,5 @@
 /**
- * Unified database adapter for MediaHub.
+ * Unified database adapter for Inventory Tracker.
  * Provides a unified tagged template literal `sql` interface and `query` / `batch` that runs on:
  *   1. Cloudflare Workers (production & preview) via `@opennextjs/cloudflare` D1 binding (`env.DB`).
  *   2. Vercel / Neon via `@vercel/postgres` (`process.env.POSTGRES_URL` or `DATABASE_URL`).
@@ -522,7 +522,7 @@ async function ensurePostgresSchema(pg: any): Promise<void> {
   // PostgreSQL compatibility functions for SQLite queries
   await runSafe(
     () => sql`
-      CREATE OR REPLACE FUNCTION _mediahub_group_concat_step(text, text) RETURNS text AS $$
+      CREATE OR REPLACE FUNCTION _inventory_tracker_group_concat_step(text, text) RETURNS text AS $$
         SELECT CASE
           WHEN $1 IS NULL OR $1 = '' THEN $2
           WHEN $2 IS NULL OR $2 = '' THEN $1
@@ -530,13 +530,13 @@ async function ensurePostgresSchema(pg: any): Promise<void> {
         END;
       $$ LANGUAGE SQL IMMUTABLE;
     `,
-    "CREATE FUNCTION _mediahub_group_concat_step"
+    "CREATE FUNCTION _inventory_tracker_group_concat_step"
   );
 
   await runSafe(
     () => sql`
       CREATE OR REPLACE AGGREGATE group_concat(text) (
-        SFUNC = _mediahub_group_concat_step,
+        SFUNC = _inventory_tracker_group_concat_step,
         STYPE = text,
         INITCOND = ''
       );

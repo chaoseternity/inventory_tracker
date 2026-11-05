@@ -1,4 +1,4 @@
-// MediaHub & Media Club NFC Station PWA Service Worker
+// Inventory Tracker NFC Station PWA Service Worker
 //
 // Privacy: only the NFC station page and static assets are cached. Other dashboard pages
 // (user lists, events, profiles), /rsvp/<token> pages and all API responses are never stored,
@@ -6,8 +6,8 @@
 // cleared on sign-out (CLEAR_USER_CACHE message from lib/sw-client.ts).
 
 const CACHE_VERSION = "v2";
-const PAGE_CACHE = `mediahub-station-pages-${CACHE_VERSION}`;
-const STATIC_CACHE = `mediahub-station-static-${CACHE_VERSION}`;
+const PAGE_CACHE = `inventory-tracker-station-pages-${CACHE_VERSION}`;
+const STATIC_CACHE = `inventory-tracker-station-static-${CACHE_VERSION}`;
 const CURRENT_CACHES = [PAGE_CACHE, STATIC_CACHE];
 
 // The only navigation that is cached for offline use.
@@ -80,7 +80,7 @@ self.addEventListener("install", (event) => {
   );
 });
 
-// Activate: delete every cache that is not current (including the old mediahub-station-v1,
+// Activate: delete every cache that is not current,
 // which may hold other users' pages).
 self.addEventListener("activate", (event) => {
   event.waitUntil(

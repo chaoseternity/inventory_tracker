@@ -70,8 +70,7 @@ export function Logo({
               textClassName
             )}
           >
-            <span>Media</span>
-            <span>Hub</span>
+            <span>Inventory Tracker</span>
           </span>
           {showSubtitle && (
             <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground truncate">

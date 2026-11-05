@@ -88,8 +88,8 @@ const HANDOVER_CODE_RE = /^HD-\d{6}$/i;
 
 /** Bare 6-digit form ("482913"), also accepted by the server's normalizeHandoverCode. */
 const BARE_HANDOVER_DIGITS_RE = /^\d{6}$/;
-/** QR payload types: the server generates "MEDIAHUB_HANDOVER"; "HANDOVER" kept for older payloads. */
-const HANDOVER_QR_TYPES = new Set(["MEDIAHUB_HANDOVER", "HANDOVER"]);
+/** QR payload types: the server generates "INVENTORY_TRACKER_HANDOVER"; "HANDOVER" kept for older payloads. */
+const HANDOVER_QR_TYPES = new Set(["INVENTORY_TRACKER_HANDOVER", "HANDOVER"]);
 
 /**
  * Returns the normalized "HD-XXXXXX" code if `code` is an explicit handover code

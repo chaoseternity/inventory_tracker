@@ -7,7 +7,6 @@ import {
   CheckCircle2,
   XCircle,
   Play,
-  RotateCcw,
   Barcode,
   Search,
   AlertTriangle,
@@ -19,9 +18,7 @@ import {
   Users,
   QrCode,
   Radio,
-  Check,
   X,
-  Sparkles,
   Focus,
   Flashlight,
 } from "lucide-react";
@@ -116,7 +113,7 @@ function extractIdentifier(rawCode: string, equipmentList: Equipment[]): string 
 export function AuditClient({
   initialSession,
   equipmentList,
-  role,
+  role: _role,
   userName,
 }: AuditClientProps) {
   const router = useRouter();
@@ -147,7 +144,6 @@ export function AuditClient({
 
   // Live Multi-User Sync State
   const [isSyncing, setIsSyncing] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState<Date | null>(null);
 
   const scanInputRef = useRef<HTMLInputElement | null>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -715,14 +711,12 @@ export function AuditClient({
           }
           return activeData;
         });
-        setLastSyncTime(new Date());
       } else {
         // Active session was finalized/cancelled by another admin
         if (sessionRef.current?.status === "in_progress") {
           setCompletionSummary("The active audit session was completed or cancelled by another administrator.");
         }
         setSession((prev) => (prev?.status === "in_progress" ? null : prev));
-        setLastSyncTime(new Date());
       }
     } catch (err) {
       console.warn("Audit sync poll failed:", err);

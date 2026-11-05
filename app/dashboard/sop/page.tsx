@@ -4,7 +4,7 @@ import { SOPManager } from "@/components/SOPManager";
 import { redirect } from "next/navigation";
 
 export const metadata = {
-  title: "SOP & AI Assistant | MediaHub",
+  title: "SOP & AI Assistant | Inventory Tracker",
   description: "Standard Operating Procedures knowledge base and AI Assistant powered by Google Gemini",
 };
 

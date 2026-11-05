@@ -3337,7 +3337,7 @@ export async function createHandoverCode(
   for (let attempt = 0; attempt < 8 && !inserted; attempt++) {
     const code = generateRandomHandoverCode();
     const qrPayload = JSON.stringify({
-      type: "MEDIAHUB_HANDOVER",
+      type: "INVENTORY_TRACKER_HANDOVER",
       code,
       checkout_id: checkoutId,
       equipment_id: checkout.equipment_id,

@@ -54,12 +54,12 @@ export async function POST(req: NextRequest) {
     return validationErrorResponse(parsed.error);
   }
 
-  const customMessage = parsed.data.message?.trim() || "Test notification from MediaHub Inventory System.";
+  const customMessage = parsed.data.message?.trim() || "Test notification from Inventory Tracker.";
 
   try {
     const result = await sendClubWebhook({
       event: "webhook.test",
-      title: "🔔 MediaHub Webhook Test",
+      title: "🔔 Inventory Tracker Webhook Test",
       description: customMessage,
       fields: [
         { name: "Initiated By", value: session.user.name || session.user.email || "Admin" },

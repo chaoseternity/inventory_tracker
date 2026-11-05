@@ -1,5 +1,5 @@
 {
-  "name": "mediahub_website",
+  "name": "inventory-tracker",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -26,8 +26,6 @@
     "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^5.2.2",
     "@types/jszip": "^3.4.0",
-    "@vercel/postgres": "^0.10.0",
-    "@vercel/speed-insights": "^2.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "html5-qrcode": "^2.3.8",

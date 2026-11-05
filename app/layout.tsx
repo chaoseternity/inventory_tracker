@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Media Club | MediaHub",
+  title: "Media Club | Inventory Tracker",
   description: "Official Media Club equipment inventory & events management system",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
