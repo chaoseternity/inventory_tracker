@@ -156,7 +156,7 @@ describe("askSOPAssistant with SOP & Web Fallback", () => {
 ### 🌐 From Web / General AI Knowledge
 The Sony FX3 weighs approximately 715g (1 lb 9.3 oz) including battery and memory card.
 
-*Note: This information is sourced from general web/AI knowledge and does not represent official Inventory Tracker club policy.*
+*Note: This information is sourced from general web/AI knowledge and does not represent official Inventory Tracker policy.*
 
 \`\`\`json_citations
 []

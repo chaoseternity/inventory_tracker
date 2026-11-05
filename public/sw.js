@@ -20,7 +20,7 @@ const PRECACHE_ASSETS = [
   "/icons/icon-512.png",
   "/icons/icon-maskable-512.png",
   "/icons/icon.svg",
-  "/icons/media-club-logo.svg",
+
   "/manifest.webmanifest",
 ];
 

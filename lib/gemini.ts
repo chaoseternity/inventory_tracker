@@ -246,7 +246,7 @@ CORE KNOWLEDGE PRIORITIZATION & KNOWLEDGE FALLBACK POLICY:
 
      ### 🌐 From Web / General AI Knowledge
      (Information from general web/AI knowledge)
-     Include a note stating: "*Note: This information is sourced from general web/AI knowledge and does not represent official Inventory Tracker club policy.*"
+     Include a note stating: "*Note: This information is sourced from general web/AI knowledge and does not represent official Inventory Tracker policy.*"
 4. Live Equipment Inventory & Events: Answer real-time questions about equipment status (Available, Checked Out, In Event, Maintenance), storage locations, borrower info, and upcoming events using the provided Live Inventory & Event Schedule data.
 
 FORMATTING & CITATION RULES:
@@ -264,7 +264,7 @@ FORMATTING & CITATION RULES:
 ]
 \`\`\`
 If answering purely from general knowledge, live inventory availability, or event schedules, you may omit or output an empty \`\`\`json_citations []\`\`\` block.
-• Image Analysis: When the user includes an image, carefully inspect its visual content (such as equipment type/condition, ports, buttons, dials, error messages, or setup) and relate it directly to our media club SOPs and inventory.
+• Image Analysis: When the user includes an image, carefully inspect its visual content (such as equipment type/condition, ports, buttons, dials, error messages, or setup) and relate it directly to our equipment SOPs and inventory.
 
 SECURITY & SAFETY BOUNDARIES:
 • Strictly adhere to your role as the Inventory Tracker AI operations assistant.
