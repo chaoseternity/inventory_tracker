@@ -13,7 +13,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { parseEquipmentId, getAdaptiveBarcodeWidth } from "@/lib/utils";
-import { MediaClubLogo } from "@/components/MediaClubLogo";
+import { Package } from "lucide-react";
 import type { Equipment, EquipmentDetail } from "@/lib/types";
 
 interface PrintLabelModalProps {
@@ -154,8 +154,8 @@ export function PrintLabelModal({ equipment, open, onClose }: PrintLabelModalPro
           >
             <div className="flex items-center justify-between w-full border-b pb-1.5 px-1">
               <div className="flex items-center gap-1.5">
-                <MediaClubLogo className="h-5 w-auto text-black" variant="solid" />
-                <span className="font-bold text-xs tracking-wider uppercase text-gray-900">Media Club</span>
+                <Package className="h-4 w-4 text-gray-900" />
+                <span className="font-bold text-xs tracking-wider uppercase text-gray-900">Inventory Tracker</span>
               </div>
               {equipment.tags && equipment.tags.length > 0 && (
                 <span className="text-[10px] font-medium bg-gray-100 text-gray-800 px-1.5 py-0.5 rounded">

@@ -16,13 +16,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Media Club | Inventory Tracker",
-  description: "Official Media Club equipment inventory & events management system",
+  title: "Inventory Tracker",
+  description: "Equipment inventory & events management system",
   manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Media Club NFC Station",
+    title: "Inventory Tracker NFC Station",
   },
   icons: {
     icon: [

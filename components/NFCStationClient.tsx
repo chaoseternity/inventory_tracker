@@ -32,7 +32,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Logo } from "@/components/Logo";
-import { MediaClubLogo } from "@/components/MediaClubLogo";
+
 import {
   isOnline,
   getOfflineQueue,
@@ -1185,11 +1185,11 @@ export function NFCStationClient({
             <div className="flex items-center gap-2">
               <h1 className="text-2xl font-bold tracking-tight">NFC Equipment Station</h1>
               <Badge variant="outline" className="hidden sm:inline-flex text-[11px] font-bold uppercase tracking-wider bg-primary/5 border-primary/30 text-primary">
-                Media Club
+                Inventory Tracker
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
-              Official Media Club equipment checkout &amp; return workstation
+              Equipment checkout &amp; return workstation
             </p>
           </div>
         </div>
@@ -1353,7 +1353,7 @@ export function NFCStationClient({
             <div className="absolute -bottom-24 -left-24 w-64 h-64 bg-indigo-500/10 rounded-full blur-3xl pointer-events-none" />
 
             <div className="mb-4 bg-black px-5 py-3.5 rounded-2xl border border-white/15 shadow-md flex items-center justify-center">
-              <MediaClubLogo className="h-14 sm:h-16 w-auto" variant="white" />
+              <Package className="h-10 sm:h-12 w-10 sm:w-12 text-white" />
             </div>
 
             <div className="relative mb-5">
@@ -1367,7 +1367,7 @@ export function NFCStationClient({
               Scan Member NFC Card
             </h2>
             <span className="text-xs font-semibold uppercase tracking-wider text-primary/80 mb-2 block">
-              Media Club Station
+              Inventory Tracker Station
             </span>
             <p className="text-sm text-muted-foreground max-w-md mb-6">
               Hold or tap the member&apos;s physical NFC card on the USB scanner connected to this
@@ -1484,7 +1484,7 @@ export function NFCStationClient({
                   <div className="flex items-center gap-2">
                     <h2 className="text-xl font-bold">{cardData.card.member_name}</h2>
                     <Badge variant="outline" className="text-xs font-semibold text-primary border-primary/30 bg-primary/5">
-                      Media Club
+                      Inventory Tracker
                     </Badge>
                     <Badge variant="outline" className="font-mono text-xs text-muted-foreground border-border">
                       {cardData.card.nfc_value}
@@ -1710,7 +1710,7 @@ export function NFCStationClient({
                     {popupMode === "checkout" ? "Equipment Checkout Session" : "Equipment Return Session"}
                   </h2>
                   <Badge variant="outline" className="hidden sm:inline-flex text-[10px] font-bold uppercase tracking-wider border-primary/40 text-primary bg-primary/10">
-                    Media Club
+                    Inventory Tracker
                   </Badge>
                   <Badge
                     variant="outline"

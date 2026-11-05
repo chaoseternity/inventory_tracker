@@ -1,6 +1,6 @@
 import React from "react";
 import { cn } from "@/lib/utils";
-import { MEDIA_CLUB_PATH } from "@/components/MediaClubLogo";
+import { Package } from "lucide-react";
 
 interface LogoProps extends React.HTMLAttributes<HTMLDivElement> {
   size?: "xs" | "sm" | "md" | "lg" | "xl";
@@ -37,27 +37,14 @@ export function Logo({
 
   return (
     <div className={cn("flex items-center gap-2.5 min-w-0 select-none", className)} {...props}>
-      {/* Official Media Club Emblem Badge: Solid Black Background + Crisp White Words */}
+      {/* Inventory Tracker Emblem Badge: Solid Black Background + Clean Package Icon */}
       <div
         className={cn(
-          "relative flex items-center justify-center shrink-0 rounded-xl overflow-hidden shadow-xs ring-1 ring-white/10 bg-black",
+          "relative flex items-center justify-center shrink-0 rounded-xl overflow-hidden shadow-xs ring-1 ring-white/10 bg-black text-white",
           iconSizes[size]
         )}
       >
-        <svg viewBox="0 0 512 512" className="w-full h-full" fill="none">
-          {/* Solid Black Base & Crisp Subtle Border */}
-          <rect width="512" height="512" rx="112" fill="#000000" />
-          <rect width="512" height="512" rx="112" stroke="#ffffff" strokeOpacity="0.2" strokeWidth="6" />
-
-          {/* Authentic Media Club Artwork in Pure White */}
-          <g transform="translate(46, 111) scale(0.4805)">
-            <path
-              fillRule="evenodd"
-              d={MEDIA_CLUB_PATH}
-              fill="#ffffff"
-            />
-          </g>
-        </svg>
+        <Package className="w-3/5 h-3/5 text-white" />
       </div>
 
       {/* Typography */}
@@ -74,7 +61,7 @@ export function Logo({
           </span>
           {showSubtitle && (
             <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground truncate">
-              Media Club
+              Equipment Portal
             </span>
           )}
         </div>

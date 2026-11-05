@@ -169,11 +169,11 @@ export function Sidebar({ userName, role }: SidebarProps) {
             )}
           >
             <span className="font-extrabold tracking-tight truncate flex items-center gap-0.5 text-foreground leading-tight text-lg">
-              <span>Media</span>
-              <span>Hub</span>
+              <span>Inventory Tracker</span>
+
             </span>
             <span className="text-[10px] font-bold tracking-wider uppercase text-muted-foreground truncate">
-              Media Club
+              Equipment Portal
             </span>
           </div>
         </Link>

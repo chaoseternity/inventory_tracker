@@ -10,7 +10,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { MediaClubLogo } from "@/components/MediaClubLogo";
+import { Package } from "lucide-react";
 
 function MicrosoftIcon() {
   return (
@@ -53,13 +53,13 @@ export default function LoginPage() {
       <Card className="w-full max-w-sm shadow-md">
         <CardHeader className="text-center pb-4 flex flex-col items-center">
           <div className="mb-4 bg-black p-3.5 rounded-2xl border border-white/15 shadow-md flex items-center justify-center">
-            <MediaClubLogo className="h-14 sm:h-16 w-auto" variant="white" />
+            <Package className="h-12 w-12 text-white" />
           </div>
           <CardTitle className="text-2xl font-extrabold tracking-tight">
             Inventory Tracker
           </CardTitle>
           <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mt-0.5">
-            Media Club Equipment Portal
+            Equipment Inventory Portal
           </span>
           <CardDescription className="text-xs mt-1">
             Sign in to manage your equipment & events
