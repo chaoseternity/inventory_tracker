@@ -82,7 +82,7 @@ const PRESET_QUESTIONS = [
 const CATEGORIES = ["All", "General", "Photo", "Video", "Audio/AV", "Safety & Handling", "Events"];
 const DOC_CATEGORIES = ["General", "Photo", "Video", "Audio/AV", "Safety & Handling", "Events"];
 
-const SESSION_STORAGE_KEY = "mediahub_ai_chat_session";
+const SESSION_STORAGE_KEY = "inventory_tracker_ai_chat_session";
 
 // Limits enforced by POST /api/sop/chat (history <= 50 messages, each <= 4000 chars).
 // Send only the most recent turns, well under the server cap.
@@ -115,7 +115,7 @@ function getWelcomeMessage(name: string): ChatMessage {
   return {
     id: "welcome",
     role: "assistant",
-    content: `Hello ${name}! 👋 I am your **MediaHub AI Operations Assistant**, powered by Google Gemini.\n\nI have real-time access to:\n1. 📋 **Official SOPs & Guidelines** (handling rules, safety protocols, return checklists)\n2. 📦 **Live Inventory & Availability** (equipment status, storage locations, active checkouts)\n3. 🌐 **Web Knowledge Fallback** (retrieves technical specs or web knowledge if not found in the SOPs, clearly distinguishing SOP vs. Web content)\n\nAsk me anything or tap one of the suggested prompts below!`,
+    content: `Hello ${name}! 👋 I am your **Inventory Tracker AI Operations Assistant**, powered by Google Gemini.\n\nI have real-time access to:\n1. 📋 **Official SOPs & Guidelines** (handling rules, safety protocols, return checklists)\n2. 📦 **Live Inventory & Availability** (equipment status, storage locations, active checkouts)\n3. 🌐 **Web Knowledge Fallback** (retrieves technical specs or web knowledge if not found in the SOPs, clearly distinguishing SOP vs. Web content)\n\nAsk me anything or tap one of the suggested prompts below!`,
     created_at: new Date().toISOString(),
   };
 }
@@ -901,7 +901,7 @@ export function SOPManager({ initialDocuments, role, userName }: SOPManagerProps
             SOP & AI Knowledge Assistant
           </h2>
           <p className="text-muted-foreground text-sm">
-            Trained on official MediaHub Standard Operating Procedures with web search fallback and source citations
+            Trained on official Inventory Tracker Standard Operating Procedures with web search fallback and source citations
           </p>
         </div>
 
@@ -960,7 +960,7 @@ export function SOPManager({ initialDocuments, role, userName }: SOPManagerProps
             <div className="px-4 py-2.5 border-b bg-muted/30 flex items-center justify-between text-xs">
               <div className="flex items-center gap-2">
                 <div className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
-                <span className="font-semibold text-foreground">MediaHub AI Agent</span>
+                <span className="font-semibold text-foreground">Inventory Tracker AI Agent</span>
                 <Badge variant="outline" className="text-[10px] font-normal py-0 h-4 bg-background">
                   Gemini 3.5 Flash-Lite
                 </Badge>

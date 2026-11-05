@@ -56,7 +56,7 @@ export default function LoginPage() {
             <MediaClubLogo className="h-14 sm:h-16 w-auto" variant="white" />
           </div>
           <CardTitle className="text-2xl font-extrabold tracking-tight">
-            MediaHub
+            Inventory Tracker
           </CardTitle>
           <span className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mt-0.5">
             Media Club Equipment Portal

@@ -197,7 +197,7 @@ function RSVPContent() {
         <div className="text-center space-y-1.5">
           <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-purple-100/80 dark:bg-purple-950/80 text-purple-700 dark:text-purple-300 text-xs font-semibold backdrop-blur-xs border border-purple-200/50 dark:border-purple-800/50 shadow-xs">
             <Sparkles className="h-3.5 w-3.5" />
-            MediaHub Production Crew
+            Inventory Tracker Production Crew
           </div>
           <h1 className="text-2xl sm:text-3xl font-extrabold tracking-tight text-foreground">
             Deployment Availability
@@ -457,7 +457,7 @@ function RSVPContent() {
             {/* Footer Assurance */}
             <div className="pt-3 border-t border-border/40 flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
               <ShieldCheck className="h-3.5 w-3.5 text-purple-600" />
-              <span>Token-authenticated MediaHub RSVP • Instant synchronization</span>
+              <span>Token-authenticated Inventory Tracker RSVP • Instant synchronization</span>
             </div>
           </CardContent>
         </Card>

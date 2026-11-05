@@ -98,14 +98,14 @@ export interface ProcessSyncOptions {
 }
 
 const STORAGE_KEYS = {
-  QUEUE: "mediahub_offline_queue_v1",
-  EQUIPMENT: "mediahub_offline_equipment_v1",
-  CARDS: "mediahub_offline_cards_v1",
-  MEMBERS: "mediahub_offline_members_v1",
-  LAST_SYNC: "mediahub_offline_last_sync_v1",
-  REJECTED: "mediahub_offline_rejected_v1",
-  SYNC_LOCK: "mediahub_offline_sync_lock_v1",
-  ACTIVE_USER: "mediahub_offline_active_user_v1",
+  QUEUE: "inventory_tracker_offline_queue_v1",
+  EQUIPMENT: "inventory_tracker_offline_equipment_v1",
+  CARDS: "inventory_tracker_offline_cards_v1",
+  MEMBERS: "inventory_tracker_offline_members_v1",
+  LAST_SYNC: "inventory_tracker_offline_last_sync_v1",
+  REJECTED: "inventory_tracker_offline_rejected_v1",
+  SYNC_LOCK: "inventory_tracker_offline_sync_lock_v1",
+  ACTIVE_USER: "inventory_tracker_offline_active_user_v1",
 };
 
 export const OFFLINE_QUEUE_STORAGE_KEY = STORAGE_KEYS.QUEUE;
@@ -193,8 +193,8 @@ export function setOfflineUser(userId: string | number | null | undefined): void
   if (!id) return;
   safeSetItem(STORAGE_KEYS.ACTIVE_USER, id);
   migrateLegacyData(id);
-  emitEvent("mediahub-offline-queue-changed", { count: readQueue(id).length });
-  emitEvent("mediahub-offline-rejections-changed", { count: readRejected(id).length });
+  emitEvent("inventory-tracker-offline-queue-changed", { count: readQueue(id).length });
+  emitEvent("inventory-tracker-offline-rejections-changed", { count: readRejected(id).length });
 }
 
 function migrateLegacyData(userId: string): void {
@@ -263,7 +263,7 @@ function readQueue(userId: string | null): QueuedAction[] {
 
 function writeQueue(userId: string | null, queue: QueuedAction[]): void {
   safeSetItem(offlineStorageKey(STORAGE_KEYS.QUEUE, userId), JSON.stringify(queue));
-  emitEvent("mediahub-offline-queue-changed", { count: queue.length });
+  emitEvent("inventory-tracker-offline-queue-changed", { count: queue.length });
 }
 
 /** The current station user's queued actions (FIFO). */
@@ -376,7 +376,7 @@ function writeRejected(userId: string | null, list: RejectedAction[]): void {
   const key = offlineStorageKey(STORAGE_KEYS.REJECTED, userId);
   if (list.length === 0) safeRemoveItem(key);
   else safeSetItem(key, JSON.stringify(list));
-  emitEvent("mediahub-offline-rejections-changed", { count: list.length });
+  emitEvent("inventory-tracker-offline-rejections-changed", { count: list.length });
 }
 
 /** Rejected actions for the current station user, oldest first. */
@@ -971,7 +971,7 @@ export async function processSyncQueue(
     const total = snapshot.length;
     let processed = 0;
     const emitProgress = (current?: QueuedAction) =>
-      emitEvent("mediahub-sync-status-changed", {
+      emitEvent("inventory-tracker-sync-status-changed", {
         isSyncing: true,
         processed,
         total,
@@ -1071,7 +1071,7 @@ export async function processSyncQueue(
     if (lockAcquired) {
       releaseSyncLock();
       safeSetItem(STORAGE_KEYS.LAST_SYNC, new Date().toISOString());
-      emitEvent("mediahub-sync-status-changed", {
+      emitEvent("inventory-tracker-sync-status-changed", {
         isSyncing: false,
         successCount,
         failedCount,

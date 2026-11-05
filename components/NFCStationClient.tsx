@@ -313,16 +313,16 @@ export function NFCStationClient({
     document.addEventListener("fullscreenchange", onFullscreenChange);
     window.addEventListener("online", handleOnline);
     window.addEventListener("offline", handleOffline);
-    window.addEventListener("mediahub-offline-queue-changed", updateQueue);
-    window.addEventListener("mediahub-offline-rejections-changed", updateRejected);
+    window.addEventListener("inventory-tracker-offline-queue-changed", updateQueue);
+    window.addEventListener("inventory-tracker-offline-rejections-changed", updateRejected);
 
     return () => {
       window.removeEventListener("beforeinstallprompt", handleBeforeInstall);
       document.removeEventListener("fullscreenchange", onFullscreenChange);
       window.removeEventListener("online", handleOnline);
       window.removeEventListener("offline", handleOffline);
-      window.removeEventListener("mediahub-offline-queue-changed", updateQueue);
-      window.removeEventListener("mediahub-offline-rejections-changed", updateRejected);
+      window.removeEventListener("inventory-tracker-offline-queue-changed", updateQueue);
+      window.removeEventListener("inventory-tracker-offline-rejections-changed", updateRejected);
     };
   }, [initialEquipment, initialCards, currentUserId]);
 
@@ -592,8 +592,8 @@ export function NFCStationClient({
         current: detail.currentDescription,
       });
     };
-    window.addEventListener("mediahub-sync-status-changed", onStatus);
-    return () => window.removeEventListener("mediahub-sync-status-changed", onStatus);
+    window.addEventListener("inventory-tracker-sync-status-changed", onStatus);
+    return () => window.removeEventListener("inventory-tracker-sync-status-changed", onStatus);
   }, []);
 
   // Station lock: while syncing, swallow ALL keyboard input (typing, Enter, Escape and
@@ -2100,7 +2100,7 @@ export function NFCStationClient({
               <DialogTitle>Install NFC Station App</DialogTitle>
             </div>
             <DialogDescription>
-              Run MediaHub NFC Station in its own dedicated, borderless desktop window on this laptop.
+              Run Inventory Tracker NFC Station in its own dedicated, borderless desktop window on this laptop.
             </DialogDescription>
           </DialogHeader>
 
@@ -2119,7 +2119,7 @@ export function NFCStationClient({
                 </li>
                 <li>
                   Or click the browser menu (<strong>...</strong> or <strong>⋮</strong>) &rarr;{" "}
-                  <strong>Apps</strong> &rarr; <strong>Install MediaHub NFC Station</strong>.
+                  <strong>Apps</strong> &rarr; <strong>Install Inventory Tracker NFC Station</strong>.
                 </li>
                 <li>Click <strong>Install</strong> to confirm.</li>
               </ol>

@@ -83,7 +83,7 @@ export async function POST(req: NextRequest) {
   try {
     const session = await auth();
     if (!session) {
-      return NextResponse.json({ error: "Unauthorized. Please log in to MediaHub." }, { status: 401 });
+      return NextResponse.json({ error: "Unauthorized. Please log in to Inventory Tracker." }, { status: 401 });
     }
 
     const email = session.user?.email;

@@ -1,8 +1,8 @@
-# MediaHub: Hosting Database on a NAS (Network Attached Storage)
+# Inventory Tracker: Hosting Database on a NAS (Network Attached Storage)
 
 **Yes, absolutely!** You can host the database directly on a **NAS (Network Attached Storage)**.
 
-MediaHub uses standard **PostgreSQL** syntax and schemas. Any PostgreSQL instance running on a NAS (Synology, QNAP, TrueNAS, Unraid, etc.) will work seamlessly.
+Inventory Tracker uses standard **PostgreSQL** syntax and schemas. Any PostgreSQL instance running on a NAS (Synology, QNAP, TrueNAS, Unraid, etc.) will work seamlessly.
 
 ---
 
@@ -26,32 +26,32 @@ You can spin up a PostgreSQL instance using **Docker Compose** or your NAS Conta
 version: "3.8"
 
 services:
-  mediahub-db:
+  inventory-tracker-db:
     image: postgres:16-alpine
-    container_name: mediahub-postgres
+    container_name: inventory-tracker-postgres
     restart: always
     environment:
-      POSTGRES_DB: mediahub_db
-      POSTGRES_USER: mediahub_user
+      POSTGRES_DB: inventory_tracker_db
+      POSTGRES_USER: inventory_tracker_user
       POSTGRES_PASSWORD: YourSecurePasswordHere
     ports:
       - "5432:5432"
     volumes:
       # Store database data permanently on your NAS RAID storage pool:
-      - /volume1/docker/mediahub/pgdata:/var/lib/postgresql/data
+      - /volume1/docker/inventory-tracker/pgdata:/var/lib/postgresql/data
 ```
 
 ---
 
-### 2. Connect MediaHub to Your NAS Database
-In your MediaHub project’s `.env.local` (or server deployment environment), set the PostgreSQL connection string pointing to your NAS IP address:
+### 2. Connect Inventory Tracker to Your NAS Database
+In your Inventory Tracker project’s `.env.local` (or server deployment environment), set the PostgreSQL connection string pointing to your NAS IP address:
 
 ```env
 # Replace 192.168.1.100 with your NAS's local IP address or local hostname:
-POSTGRES_URL="postgresql://mediahub_user:YourSecurePasswordHere@192.168.1.100:5432/mediahub_db?sslmode=disable"
+POSTGRES_URL="postgresql://inventory_tracker_user:YourSecurePasswordHere@192.168.1.100:5432/inventory_tracker_db?sslmode=disable"
 ```
 
-MediaHub’s built-in `ensureSchema()` will automatically create all tables (`equipment`, `checkouts`, `nfc_cards`, `users`, `events`, `sop_documents`) the first time the app starts.
+Inventory Tracker’s built-in `ensureSchema()` will automatically create all tables (`equipment`, `checkouts`, `nfc_cards`, `users`, `events`, `sop_documents`) the first time the app starts.
 
 ---
 
@@ -59,13 +59,13 @@ MediaHub’s built-in `ensureSchema()` will automatically create all tables (`eq
 If you already have existing data on a cloud database that you want to move over:
 1. **Export existing data**:
    ```bash
-   pg_dump -d "YOUR_OLD_POSTGRES_URL" --data-only --exclude-table=_vercel* > mediahub_backup.sql
+   pg_dump -d "YOUR_OLD_POSTGRES_URL" --data-only --exclude-table=_vercel* > inventory_tracker_backup.sql
    ```
 2. **Import into your NAS database**:
    ```bash
-   psql -h 192.168.1.100 -U mediahub_user -d mediahub_db < mediahub_backup.sql
+   psql -h 192.168.1.100 -U inventory_tracker_user -d inventory_tracker_db < inventory_tracker_backup.sql
    ```
-3. Alternatively, you can use the Excel import feature in the MediaHub dashboard to bulk upload equipment to the new database.
+3. Alternatively, you can use the Excel import feature in the Inventory Tracker dashboard to bulk upload equipment to the new database.
 
 ---
 

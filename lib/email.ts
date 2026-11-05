@@ -177,14 +177,14 @@ export async function sendDeploymentInvitationEmail({
       <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>MediaHub Event Deployment</title>
+        <title>Inventory Tracker Event Deployment</title>
       </head>
       <body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f4f5; margin: 0; padding: 24px; color: #18181b;">
         <div style="max-width: 580px; margin: 0 auto; background: #ffffff; border-radius: 12px; border: 1px solid #e4e4e7; overflow: hidden; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);">
           
           <!-- Header Banner -->
           <div style="background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%); padding: 24px; text-align: center; color: #ffffff;">
-            <h1 style="margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.02em;">MediaHub Deployment Invitation</h1>
+            <h1 style="margin: 0; font-size: 22px; font-weight: 700; letter-spacing: -0.02em;">Inventory Tracker Deployment Invitation</h1>
             <p style="margin: 6px 0 0 0; opacity: 0.9; font-size: 14px;">Are you available to crew for this upcoming event?</p>
           </div>
 
@@ -246,7 +246,7 @@ export async function sendDeploymentInvitationEmail({
 
           <!-- Footer -->
           <div style="background-color: #f4f4f5; padding: 14px 24px; border-top: 1px solid #e4e4e7; text-align: center; font-size: 12px; color: #71717a;">
-            Sent automatically by <strong>MediaHub</strong> • Event Operations & Equipment Management
+            Sent automatically by <strong>Inventory Tracker</strong> • Event Operations & Equipment Management
           </div>
         </div>
       </body>
@@ -254,7 +254,7 @@ export async function sendDeploymentInvitationEmail({
     `;
 
     const transporter = getTransporter();
-    const fromAddress = process.env.SMTP_FROM || '"MediaHub Events" <noreply@mediahub.app>';
+    const fromAddress = process.env.SMTP_FROM || '"Inventory Tracker Events" <noreply@inventorytracker.app>';
     const cleanEventName = eventName.replace(/[\r\n]+/g, " ").trim();
     const cleanToEmail = toEmail.replace(/[\r\n]+/g, "").trim();
 
@@ -339,7 +339,7 @@ export async function sendOverdueReminderEmail({
               ${badgeText}
             </div>
             <h1 style="margin: 0; font-size: 22px; font-weight: 700; line-height: 1.3;">${escapeHtml(headerTitle)}</h1>
-            <p style="margin: 6px 0 0 0; font-size: 14px; opacity: 0.9;">MediaHub Inventory Operations</p>
+            <p style="margin: 6px 0 0 0; font-size: 14px; opacity: 0.9;">Inventory Tracker Operations</p>
           </div>
 
           <!-- Body Content -->
@@ -395,7 +395,7 @@ export async function sendOverdueReminderEmail({
             <!-- Call to Action -->
             <div style="text-align: center; margin: 28px 0 16px 0;">
               <a href="${escapeHtml(dashboardUrl)}" style="display: inline-block; background-color: #18181b; color: #ffffff; text-decoration: none; padding: 12px 28px; border-radius: 8px; font-weight: 600; font-size: 14px; box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);">
-                Open MediaHub Dashboard
+                Open Inventory Tracker Dashboard
               </a>
             </div>
 
@@ -406,7 +406,7 @@ export async function sendOverdueReminderEmail({
 
           <!-- Footer -->
           <div style="background-color: #f4f4f5; padding: 14px 24px; border-top: 1px solid #e4e4e7; text-align: center; font-size: 12px; color: #71717a;">
-            Sent automatically by <strong>MediaHub</strong> • Equipment Operations
+            Sent automatically by <strong>Inventory Tracker</strong> • Equipment Operations
           </div>
         </div>
       </body>
@@ -414,13 +414,13 @@ export async function sendOverdueReminderEmail({
     `;
 
     const transporter = getTransporter();
-    const fromAddress = process.env.SMTP_FROM || '"MediaHub Reminders" <noreply@mediahub.app>';
+    const fromAddress = process.env.SMTP_FROM || '"Inventory Tracker Reminders" <noreply@inventorytracker.app>';
 
     if (transporter) {
       await transporter.sendMail({
         from: fromAddress,
         to: cleanToEmail,
-        subject: `${subjectPrefix} ${cleanEquipmentName} — MediaHub`,
+        subject: `${subjectPrefix} ${cleanEquipmentName} — Inventory Tracker`,
         html: htmlContent,
       });
       console.log(`✓ Sent ${badgeText} reminder to ${cleanToEmail} for "${cleanEquipmentName}"`);

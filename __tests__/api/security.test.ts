@@ -232,10 +232,10 @@ describe("Security Audits & Vulnerability Guards", () => {
 
       if (redirect) {
         // Protocol relative URL //evil.com must not be returned
-        const result = await redirect({ url: "//evil.com", baseUrl: "https://mediahub.club" });
-        expect(result).not.toBe("https://mediahub.club//evil.com");
+        const result = await redirect({ url: "//evil.com", baseUrl: "https://tracker.club" });
+        expect(result).not.toBe("https://tracker.club//evil.com");
         expect(result).not.toBe("//evil.com");
-        expect(result).toBe("https://mediahub.club");
+        expect(result).toBe("https://tracker.club");
       }
     });
 
@@ -243,8 +243,8 @@ describe("Security Audits & Vulnerability Guards", () => {
       const { authConfig } = await import("@/auth.config");
       const redirect = authConfig.callbacks?.redirect;
       if (redirect) {
-        const result = await redirect({ url: "/dashboard", baseUrl: "https://mediahub.club" });
-        expect(result).toBe("https://mediahub.club/dashboard");
+        const result = await redirect({ url: "/dashboard", baseUrl: "https://tracker.club" });
+        expect(result).toBe("https://tracker.club/dashboard");
       }
     });
   });

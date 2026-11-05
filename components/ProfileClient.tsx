@@ -623,7 +623,7 @@ export function ProfileClient({
                   Account Information
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Basic user profile details registered in MediaHub.
+                  Basic user profile details registered in Inventory Tracker.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 text-xs">

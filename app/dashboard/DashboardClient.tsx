@@ -117,7 +117,7 @@ export function DashboardClient({ initialData, role, userName }: DashboardClient
       a.href = url;
       // en-CA formats as YYYY-MM-DD; use the club's date, not the UTC date.
       const today = new Date().toLocaleDateString("en-CA", { timeZone: APP_TIMEZONE });
-      a.download = `MediaHub_Equipment_${today}.xlsx`;
+      a.download = `Inventory_Tracker_Equipment_${today}.xlsx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

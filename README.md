@@ -1,4 +1,4 @@
-# MediaHub — NUS High Media Club Equipment & Operations Hub
+# Inventory Tracker — NUS High Media Club Equipment & Operations Hub
 
 [![Next.js](https://img.shields.io/badge/Next.js-16.3-black?logo=next.js)](https://nextjs.org/)
 [![React](https://img.shields.io/badge/React-19-blue?logo=react)](https://react.dev/)
@@ -9,7 +9,7 @@
 
 A modern, full-stack equipment inventory, checkout, reservation, and field logistics platform built specifically for the **NUS High Media Club** ([nushmedia.app](https://nushmedia.app)). 
 
-MediaHub manages high-value production gear (cinema cameras, wireless audio kits, lenses, lighting, accessories, and laptops) with automated audit workflows, peer-to-peer equipment handovers, dedicated kiosk NFC scanning, interactive storage mapping, and an AI-powered Standard Operating Procedure (SOP) assistant.
+Inventory Tracker manages high-value production gear (cinema cameras, wireless audio kits, lenses, lighting, accessories, and laptops) with automated audit workflows, peer-to-peer equipment handovers, dedicated kiosk NFC scanning, interactive storage mapping, and an AI-powered Standard Operating Procedure (SOP) assistant.
 
 ---
 
@@ -49,7 +49,7 @@ MediaHub manages high-value production gear (cinema cameras, wireless audio kits
 
 ## Hardware & Scanner Integration
 
-MediaHub is built from the ground up to support physical hardware scanners used during club productions:
+Inventory Tracker is built from the ground up to support physical hardware scanners used during club productions:
 
 1. **In-Browser Smartphone Camera Scanner**:
    - Zero-delay transparent `onPointerDown` tap layer for instant tap-to-focus.
@@ -97,8 +97,8 @@ MediaHub is built from the ground up to support physical hardware scanners used 
 
 ### 1. Clone the repository
 ```bash
-git clone https://github.com/chaoseternity/mediahub_website.git
-cd mediahub_website
+git clone https://github.com/chaoseternity/inventory-tracker.git
+cd inventory-tracker
 ```
 
 ### 2. Install dependencies
@@ -148,15 +148,15 @@ Open [http://localhost:3000](http://localhost:3000) in your browser.
 | `GEMINI_MODEL` | Primary Gemini model ID. | Optional | `gemini-3.5-flash-lite` |
 | `SMTP_HOST` | SMTP server host for checkout reminder emails. | Optional | `smtp.gmail.com` |
 | `SMTP_PORT` | SMTP server port. | Optional | `587` |
-| `SMTP_USER` | SMTP username / email address. | Optional | `mediahub@gmail.com` |
+| `SMTP_USER` | SMTP username / email address. | Optional | `inventory@gmail.com` |
 | `SMTP_PASS` | SMTP application password. | Optional | `xxxx xxxx xxxx xxxx` |
-| `SMTP_FROM` | Sender name and address for automated emails. | Optional | `"MediaHub" <mediahub@gmail.com>` |
+| `SMTP_FROM` | Sender name and address for automated emails. | Optional | `"Inventory Tracker" <inventory@gmail.com>` |
 
 ---
 
 ## User Roles & Permissions (RBAC)
 
-MediaHub enforces three user permission tiers:
+Inventory Tracker enforces three user permission tiers:
 
 | Role | Access Level | Description |
 | :--- | :---: | :--- |
@@ -182,7 +182,7 @@ npm run set-role -- --email=student@nushigh.edu.sg --role=viewer
 
 ## Database Management & Migrations
 
-Database migrations are located in [`migrations/`](file:///C:/GitHub%20Code/mediahub_website/migrations) and run in strict alphabetical order:
+Database migrations are located in [`migrations/`](migrations) and run in strict alphabetical order:
 
 ```bash
 # Apply migrations locally
@@ -250,7 +250,7 @@ The production deployment runs as an edge-rendered serverless application on Clo
    npx wrangler d1 create inventory-tracker-db
    ```
 2. **Configure `wrangler.toml`**:
-   Ensure `database_name` and `database_id` in [`wrangler.toml`](file:///C:/GitHub%20Code/mediahub_website/wrangler.toml) match your Cloudflare D1 instance.
+   Ensure `database_name` and `database_id` in [`wrangler.toml`](wrangler.toml) match your Cloudflare D1 instance.
 3. **Apply Remote Migrations**:
    ```bash
    npm run db:migration:remote
@@ -274,7 +274,7 @@ The production deployment runs as an edge-rendered serverless application on Clo
 ### Vercel + PostgreSQL (Alternative)
 
 If hosting on Vercel with a standard PostgreSQL database (e.g. self-hosted on a Synology NAS or Neon/Supabase):
-1. Switch to the [`vercel`](https://github.com/chaoseternity/mediahub_website/tree/vercel) branch:
+1. Switch to the [`vercel`](https://github.com/chaoseternity/inventory-tracker/tree/vercel) branch:
    ```bash
    git checkout vercel
    ```
@@ -286,7 +286,7 @@ If hosting on Vercel with a standard PostgreSQL database (e.g. self-hosted on a 
 ## Project Directory Structure
 
 ```text
-mediahub_website/
+inventory_tracker/
 ├── app/                        # Next.js App Router
 │   ├── (auth)/login/           # Sign-in page (Azure AD / Google)
 │   ├── api/                    # REST API route handlers

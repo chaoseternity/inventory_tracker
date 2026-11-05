@@ -1,5 +1,5 @@
 /**
- * Cloudflare D1 database adapter for MediaHub.
+ * Cloudflare D1 database adapter for Inventory Tracker.
  * Provides a unified tagged template literal `sql` interface that runs on:
  *   1. Cloudflare Workers (production & preview) via `@opennextjs/cloudflare` D1 binding (`env.DB`).
  *   2. Local development & Jest test suites via `better-sqlite3`.

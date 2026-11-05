@@ -4,7 +4,7 @@ import { redirect } from "next/navigation";
 import { NFCStationClient } from "@/components/NFCStationClient";
 
 export const metadata = {
-  title: "Media Club NFC Station | MediaHub",
+  title: "Media Club NFC Station | Inventory Tracker",
   description: "Official Media Club NFC card member checkout and return workstation",
 };
 

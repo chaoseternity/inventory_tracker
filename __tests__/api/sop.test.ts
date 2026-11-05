@@ -63,7 +63,7 @@ describe("SOP database helpers & duplicate conflict logic", () => {
   });
 
   test("inserts and retrieves SOP document with full metadata", () => {
-    const adminId = insertUser(db, { name: "Lead Admin", email: "admin@mediahub.org" });
+    const adminId = insertUser(db, { name: "Lead Admin", email: "admin@inventorytracker.org" });
     const sopId = insertSOP(db, {
       title: "Audio Mixer SOP",
       category: "Audio/AV",

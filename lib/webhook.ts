@@ -74,7 +74,7 @@ export function buildDiscordPayload(message: WebhookMessage, color: number, time
   }));
 
   const title = truncateText(message.title, DISCORD_TITLE_MAX);
-  const footer = truncateText(`MediaHub • ${message.event}`, DISCORD_FOOTER_MAX);
+  const footer = truncateText(`Inventory Tracker • ${message.event}`, DISCORD_FOOTER_MAX);
   // Discord also caps the combined embed text at 6000 characters: drop trailing fields first,
   // then shorten the description.
   const fieldsLength = () => fields.reduce((n, f) => n + f.name.length + f.value.length, 0);
@@ -87,8 +87,8 @@ export function buildDiscordPayload(message: WebhookMessage, color: number, time
   );
 
   return {
-    username: "MediaHub Inventory",
-    avatar_url: "https://raw.githubusercontent.com/chaoseternity/mediahub_website/main/public/favicon.ico",
+    username: "Inventory Tracker",
+
     allowed_mentions: { parse: [] as string[] },
     embeds: [
       {

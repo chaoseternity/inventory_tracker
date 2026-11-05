@@ -1,4 +1,4 @@
--- Cloudflare D1 initial schema for MediaHub
+-- Cloudflare D1 initial schema for Inventory Tracker
 -- Run with: wrangler d1 migrations apply inventory-tracker-db --local (or --remote)
 
 CREATE TABLE IF NOT EXISTS users (

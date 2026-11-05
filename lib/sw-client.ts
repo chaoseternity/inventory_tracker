@@ -4,7 +4,7 @@
 
 /** Page-cache names (current and legacy) that may hold user-specific HTML. */
 function isUserPageCache(name: string): boolean {
-  return name.startsWith("mediahub-station") && !name.includes("-static-");
+  return name.startsWith("inventory-tracker-station") && !name.includes("-static-");
 }
 
 /**

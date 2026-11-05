@@ -1,7 +1,7 @@
 @echo off
-title MediaHub NFC Station Kiosk
+title Inventory Tracker NFC Station Kiosk
 echo ===================================================
-echo   MediaHub NFC Station - Dedicated Laptop Kiosk
+echo   Inventory Tracker NFC Station - Dedicated Laptop Kiosk
 echo ===================================================
 echo.
 echo Launching NFC Station in dedicated app window...
