@@ -10,7 +10,7 @@
 
 A modern, full-stack equipment inventory, checkout, reservation, and asset tracking platform.
 
-Inventory Tracker manages hardware, production gear, cameras, audio kits, lenses, tools, accessories, and laptops with automated audit workflows, peer-to-peer equipment handovers, dedicated kiosk NFC scanning, interactive storage mapping, and an AI-powered Standard Operating Procedure (SOP) assistant.
+Inventory Tracker manages hardware, production gear, cameras, audio kits, lenses, tools, accessories, and laptops with automated audit workflows, peer-to-peer equipment handovers, dedicated kiosk equipment checkout scanning, interactive storage mapping, and an AI-powered Standard Operating Procedure (SOP) assistant.
 
 ---
 
@@ -24,7 +24,7 @@ Inventory Tracker manages hardware, production gear, cameras, audio kits, lenses
 - [Environment Variables](#environment-variables)
 - [User Roles & Permissions (RBAC)](#user-roles--permissions-rbac)
 - [Database Management & Migrations](#database-management--migrations)
-- [NFC Kiosk Station Setup](#nfc-kiosk-station-setup)
+- [Equipment Checkout Kiosk Setup](#equipment-checkout-kiosk-setup)
 - [Available Scripts](#available-scripts)
 - [Deployment Guide](#deployment-guide)
   - [Cloudflare Workers + D1 (Production)](#cloudflare-workers--d1-production)
@@ -58,10 +58,9 @@ Inventory Tracker is built from the ground up to support physical hardware scann
    - Hardware Phase-Detection Autofocus (PDAF) kick via momentary micro-zoom nudge.
    - Macro zoom presets (`[1x] [2x] [3x]`) designed for scanning small 1D barcodes from 15–20 cm away.
    - Built-in flashlight/torch toggle.
-2. **USB & Bluetooth Barcode Guns**:
-   - Global keystroke buffer captures rapid scanner input (`<50ms` key intervals) on all dashboard pages without requiring input focus.
-3. **NFC Card Readers (Dedicated Station)**:
-   - Web NFC / PC/SC card readers (e.g., ACS ACR122U) paired with `/dashboard/nfc` for fast badge-in/badge-out checkouts.
+2. **USB & Bluetooth Barcode Scanners**:
+   - Global keystroke buffer captures rapid scanner input (`<100ms` key intervals) on all dashboard pages and in the **Equipment Checkout** kiosk without requiring input focus.
+   - Supports scanning both **member ID barcodes** (to sign in / identify the borrower) and **equipment barcodes** (to stage items for checkout or return).
 
 ---
 
@@ -207,17 +206,17 @@ npm run db:seed:local
 
 ---
 
-## NFC Kiosk Station Setup
+## Equipment Checkout Kiosk Setup
 
-For dedicated equipment sign-out desks using an attached USB NFC card reader:
+For dedicated equipment sign-out desks using an external USB or Bluetooth barcode scanner:
 
-1. Connect the NFC card reader to the station laptop.
+1. Connect your USB or Bluetooth barcode scanner to the station laptop.
 2. Run the dedicated kiosk script:
    ```cmd
    launch-nfc-station.bat
    ```
    *(Or navigate directly to `/dashboard/nfc` in Google Chrome or Microsoft Edge).*
-3. Users can tap their physical card or registered NFC fob to immediately pull up their active loans or check out selected gear.
+3. Scan a member's ID barcode to immediately pull up their active loans or start checking out/returning equipment via barcode scans.
 
 ---
 
@@ -296,7 +295,7 @@ inventory_tracker/
 │   │   ├── equipment/          # Equipment CRUD & batch actions
 │   │   ├── events/             # Events & asset allocations
 │   │   ├── handover/           # Peer-to-peer handover verification
-│   │   ├── nfc/                # NFC card assignment & card tap handling
+│   │   ├── nfc/                # Member barcode assignment & checkout handling
 │   │   ├── reservations/       # Equipment booking & conflict engine
 │   │   ├── sop/                # SOP document parsing & Gemini AI chat
 │   │   ├── storage-map/        # Cabinet layout configuration
@@ -305,7 +304,7 @@ inventory_tracker/
 │   │   ├── audit/              # Live stock roll call scanner
 │   │   ├── events/             # Event equipment manager
 │   │   ├── map/                # Interactive 2D cabinet visualizer
-│   │   ├── nfc/                # Dedicated NFC Kiosk station
+│   │   ├── nfc/                # Dedicated Equipment Checkout kiosk
 │   │   ├── reservations/       # Booking calendar & conflict view
 │   │   ├── scan/               # Barcode & QR camera scanner
 │   │   ├── sop/                # SOP manuals & AI assistant
@@ -316,7 +315,7 @@ inventory_tracker/
 │   ├── EquipmentGrid.tsx       # Equipment card catalog view
 │   ├── EquipmentModal.tsx      # Equipment detail & checkout modal
 │   ├── HandoverModal.tsx       # Peer handover code claim dialog
-│   ├── NFCStationClient.tsx    # NFC kiosk state machine
+│   ├── NFCStationClient.tsx    # Equipment Checkout kiosk state machine
 │   ├── PrintLabelModal.tsx     # 1D/2D printable asset tag generator
 │   └── QRScannerClient.tsx     # Camera scanner with tap-to-focus & zoom
 ├── lib/                        # Core utilities & database abstractions

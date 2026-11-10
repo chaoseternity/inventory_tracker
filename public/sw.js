@@ -1,6 +1,6 @@
-// Inventory Tracker NFC Station PWA Service Worker
+// Inventory Tracker Equipment Checkout PWA Service Worker
 //
-// Privacy: only the NFC station page and static assets are cached. Other dashboard pages
+// Privacy: only the Equipment Checkout page and static assets are cached. Other dashboard pages
 // (user lists, events, profiles), /rsvp/<token> pages and all API responses are never stored,
 // so a shared device does not expose a previous user's pages offline. The page cache is also
 // cleared on sign-out (CLEAR_USER_CACHE message from lib/sw-client.ts).

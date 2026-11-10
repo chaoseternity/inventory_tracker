@@ -480,8 +480,8 @@ export function confirmOfflineSignOut(): boolean {
     const pending = readQueue(userId).length;
     if (pending > 0 && typeof window !== "undefined" && typeof window.confirm === "function") {
       const proceed = window.confirm(
-        `This account has ${pending} offline NFC station action(s) that have not been synced to the database yet.\n\n` +
-          "They will stay saved on this device and sync automatically the next time this account signs in to the NFC station. " +
+        `This account has ${pending} offline Equipment Checkout action(s) that have not been synced to the database yet.\n\n` +
+          "They will stay saved on this device and sync automatically the next time this account signs in to Equipment Checkout. " +
           "Sign out anyway?"
       );
       if (!proceed) return false;

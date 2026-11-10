@@ -1,6 +1,6 @@
 {
-  "name": "Inventory Tracker - NFC Station",
-  "short_name": "Inventory Tracker",
+  "name": "Inventory Tracker - Equipment Checkout",
+  "short_name": "Equipment Checkout",
   "description": "Equipment checkout & return kiosk workstation",
   "start_url": "/dashboard/nfc",
   "display": "standalone",
