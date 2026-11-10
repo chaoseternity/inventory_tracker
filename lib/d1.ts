@@ -15,27 +15,36 @@ import type { D1Database } from "@cloudflare/workers-types";
 import { SCHEMA_SQL, setTestDb, getTestDb } from "./test-db";
 export { setTestDb, getTestDb };
 
+let cachedD1Instance: D1Database | null = null;
+let cloudflareContextUnavailable = false;
+
 /**
  * Retrieves the Cloudflare D1 Database binding if running in a Cloudflare context.
  */
 export async function getD1Database(): Promise<D1Database | null> {
   if (getTestDb()) return null;
+  if (cachedD1Instance) return cachedD1Instance;
 
   // 1. Check globalThis binding (worker isolate)
   const globalEnv = (globalThis as any).env || (globalThis as any).__env__;
   if (globalEnv?.DB) {
-    return globalEnv.DB as D1Database;
+    cachedD1Instance = globalEnv.DB as D1Database;
+    return cachedD1Instance;
   }
 
   // 2. Check OpenNext Cloudflare Context
-  try {
-    const { getCloudflareContext } = await import("@opennextjs/cloudflare");
-    const ctx = await getCloudflareContext({ async: true });
-    if ((ctx?.env as any)?.DB) {
-      return (ctx.env as any).DB as D1Database;
+  if (!cloudflareContextUnavailable) {
+    try {
+      const { getCloudflareContext } = await import("@opennextjs/cloudflare");
+      const ctx = await getCloudflareContext({ async: true });
+      if ((ctx?.env as any)?.DB) {
+        cachedD1Instance = (ctx.env as any).DB as D1Database;
+        return cachedD1Instance;
+      }
+    } catch {
+      // Outside Cloudflare context (e.g. Jest or standalone Node script)
+      cloudflareContextUnavailable = true;
     }
-  } catch {
-    // Outside Cloudflare context (e.g. Jest or standalone Node script)
   }
 
   return null;

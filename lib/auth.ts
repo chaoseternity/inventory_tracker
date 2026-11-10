@@ -1,4 +1,5 @@
 import NextAuth from "next-auth";
+import { cache } from "react";
 import { authConfig } from "@/auth.config";
 import { upsertUser, getUserByEmail } from "./db";
 import type { Role } from "./types";
@@ -13,7 +14,7 @@ export function isAllowedMicrosoftEmail(email: string): boolean {
   return email.trim().toLowerCase().endsWith(`@${MICROSOFT_ALLOWED_EMAIL_DOMAIN}`);
 }
 
-export const { handlers, auth, signIn, signOut } = NextAuth({
+const nextAuth = NextAuth({
   ...authConfig,
   session: { strategy: "jwt" },
   callbacks: {
@@ -91,3 +92,6 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     },
   },
 });
+
+export const { handlers, signIn, signOut } = nextAuth;
+export const auth = cache(nextAuth.auth);

@@ -1,4 +1,3 @@
-import nodemailer from "nodemailer";
 import type { EventSection } from "./types";
 import { formatDate, formatLongDateTime, formatTime, parseDbDate } from "./timezone";
 
@@ -75,7 +74,7 @@ interface SendDeploymentInvitationParams {
   origin?: string;
 }
 
-function getTransporter() {
+async function getTransporter() {
   const host = process.env.SMTP_HOST;
   const port = Number(process.env.SMTP_PORT) || 587;
   const user = process.env.SMTP_USER;
@@ -83,6 +82,8 @@ function getTransporter() {
   const secure = process.env.SMTP_SECURE === "true" || port === 465;
 
   if (host && user && pass) {
+    const nodemailerMod = await import("nodemailer");
+    const nodemailer = (nodemailerMod as any).default ?? nodemailerMod;
     return nodemailer.createTransport({
       host,
       port,
@@ -253,7 +254,7 @@ export async function sendDeploymentInvitationEmail({
       </html>
     `;
 
-    const transporter = getTransporter();
+    const transporter = await getTransporter();
     const fromAddress = process.env.SMTP_FROM || '"Inventory Tracker Events" <noreply@inventorytracker.app>';
     const cleanEventName = eventName.replace(/[\r\n]+/g, " ").trim();
     const cleanToEmail = toEmail.replace(/[\r\n]+/g, "").trim();
@@ -413,7 +414,7 @@ export async function sendOverdueReminderEmail({
       </html>
     `;
 
-    const transporter = getTransporter();
+    const transporter = await getTransporter();
     const fromAddress = process.env.SMTP_FROM || '"Inventory Tracker Reminders" <noreply@inventorytracker.app>';
 
     if (transporter) {

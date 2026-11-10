@@ -16,8 +16,6 @@ import { parseEquipmentId, sortEquipmentById, getAdaptiveBarcodeWidth } from "@/
 import type { Equipment, Role } from "@/lib/types";
 import { APP_TIMEZONE, parseDbDate } from "@/lib/timezone";
 import { Barcode, Loader2 } from "lucide-react";
-import JSZip from "jszip";
-import JsBarcode from "jsbarcode";
 
 interface EquipmentGridProps {
   initialData: Equipment[];
@@ -197,6 +195,12 @@ export function EquipmentGrid({ initialData, role, onAddNew: _onAddNew, userName
     if (items.length === 0) return;
     try {
       setIsDownloadingBarcodes(true);
+      const [JSZipMod, JsBarcodeMod] = await Promise.all([
+        import("jszip"),
+        import("jsbarcode"),
+      ]);
+      const JSZip = JSZipMod.default;
+      const JsBarcode = (JsBarcodeMod as any).default ?? JsBarcodeMod;
       const zip = new JSZip();
       const folder = zip.folder("barcodes");
 

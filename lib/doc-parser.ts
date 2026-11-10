@@ -1,6 +1,4 @@
-import JSZip from "jszip";
-import mammoth from "mammoth";
-import { extractText } from "unpdf";
+import type JSZip from "jszip";
 
 function toBuffer(data: ArrayBuffer | Buffer | Uint8Array): Buffer {
   if (Buffer.isBuffer(data)) return data;
@@ -93,7 +91,8 @@ export async function assertSafeDocxArchive(
 ): Promise<JSZip> {
   let zip: JSZip;
   try {
-    zip = await JSZip.loadAsync(toUint8Array(data));
+    const JSZipMod = (await import("jszip")).default;
+    zip = await JSZipMod.loadAsync(toUint8Array(data));
   } catch {
     throw new Error("Invalid Word file: the document is not a valid .docx archive.");
   }
@@ -185,6 +184,8 @@ export async function extractTextFromDocx(data: ArrayBuffer | Buffer | Uint8Arra
 
   // Method 1: Try mammoth
   try {
+    const mammothMod = await import("mammoth");
+    const mammoth = mammothMod.default ?? mammothMod;
     const buffer = toBuffer(data);
     const result = await mammoth.extractRawText({ buffer });
     if (result && result.value && result.value.trim().length > 0) {
@@ -221,6 +222,7 @@ export async function extractTextFromDocx(data: ArrayBuffer | Buffer | Uint8Arra
 export async function extractTextFromPdf(data: ArrayBuffer | Buffer | Uint8Array): Promise<string> {
   try {
     const uint8 = toUint8Array(data);
+    const { extractText } = await import("unpdf");
     const result = await extractText(uint8);
     const textRaw = result.text;
     const cleanText = (

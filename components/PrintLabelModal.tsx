@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import QRCode from "qrcode";
-import JsBarcode from "jsbarcode";
 import { Printer, Download, QrCode, Barcode } from "lucide-react";
 import {
   Dialog,
@@ -45,49 +43,37 @@ export function PrintLabelModal({ equipment, open, onClose }: PrintLabelModalPro
     setBarcodeError(null);
     const setBarcodeDataUrl = (url: string) => setBarcode({ code: codeValue, url });
 
-    // 1. Generate QR Code Data URL (async — ignore the result if the item changed meanwhile)
-    QRCode.toDataURL(codeValue, {
-      width: 300,
-      margin: 1,
-      color: {
-        dark: "#000000",
-        light: "#ffffff",
-      },
-    })
-      .then((url) => {
-        if (!cancelled) setQr({ code: codeValue, url });
-      })
-      .catch((err) => {
-        console.error("Failed to generate QR code", err);
-      });
+    Promise.all([
+      import("qrcode"),
+      import("jsbarcode"),
+    ]).then(([qrMod, barMod]) => {
+      if (cancelled) return;
+      const QRCode = (qrMod as any).default ?? qrMod;
+      const JsBarcode = (barMod as any).default ?? barMod;
 
-    // 2. Generate Barcode (Code128) via Offscreen Canvas to Data URL with Adaptive Bar Width
-    try {
-      const adaptiveWidth = getAdaptiveBarcodeWidth(codeValue, 240);
-      const canvas = document.createElement("canvas");
-      JsBarcode(canvas, codeValue, {
-        format: "CODE128",
-        width: adaptiveWidth,
-        height: 50,
-        displayValue: true,
-        fontSize: 13,
-        font: "monospace",
-        textMargin: 4,
-        margin: 8,
-        background: "#ffffff",
-        lineColor: "#000000",
-      });
-      setBarcodeDataUrl(canvas.toDataURL("image/png"));
-    } catch (err) {
-      console.error("Failed to generate Code128 barcode, retrying with fallback:", err);
-      // Fallback: sanitized alphanumeric codeValue
+      // 1. Generate QR Code Data URL (async — ignore the result if the item changed meanwhile)
+      QRCode.toDataURL(codeValue, {
+        width: 300,
+        margin: 1,
+        color: {
+          dark: "#000000",
+          light: "#ffffff",
+        },
+      })
+        .then((url: string) => {
+          if (!cancelled) setQr({ code: codeValue, url });
+        })
+        .catch((err: unknown) => {
+          console.error("Failed to generate QR code", err);
+        });
+
+      // 2. Generate Barcode (Code128) via Offscreen Canvas to Data URL with Adaptive Bar Width
       try {
-        const fallbackValue = codeValue.replace(/[^A-Za-z0-9_-]/g, "") || "EQUIPMENT";
-        const fallbackAdaptiveWidth = getAdaptiveBarcodeWidth(fallbackValue, 240);
+        const adaptiveWidth = getAdaptiveBarcodeWidth(codeValue, 240);
         const canvas = document.createElement("canvas");
-        JsBarcode(canvas, fallbackValue, {
+        JsBarcode(canvas, codeValue, {
           format: "CODE128",
-          width: fallbackAdaptiveWidth,
+          width: adaptiveWidth,
           height: 50,
           displayValue: true,
           fontSize: 13,
@@ -98,11 +84,34 @@ export function PrintLabelModal({ equipment, open, onClose }: PrintLabelModalPro
           lineColor: "#000000",
         });
         setBarcodeDataUrl(canvas.toDataURL("image/png"));
-      } catch (fallbackErr) {
-        setBarcodeError("Unable to encode barcode for this ID format.");
-        console.error("Barcode generation error:", fallbackErr);
+      } catch (err) {
+        console.error("Failed to generate Code128 barcode, retrying with fallback:", err);
+        // Fallback: sanitized alphanumeric codeValue
+        try {
+          const fallbackValue = codeValue.replace(/[^A-Za-z0-9_-]/g, "") || "EQUIPMENT";
+          const fallbackAdaptiveWidth = getAdaptiveBarcodeWidth(fallbackValue, 240);
+          const canvas = document.createElement("canvas");
+          JsBarcode(canvas, fallbackValue, {
+            format: "CODE128",
+            width: fallbackAdaptiveWidth,
+            height: 50,
+            displayValue: true,
+            fontSize: 13,
+            font: "monospace",
+            textMargin: 4,
+            margin: 8,
+            background: "#ffffff",
+            lineColor: "#000000",
+          });
+          setBarcodeDataUrl(canvas.toDataURL("image/png"));
+        } catch (fallbackErr) {
+          setBarcodeError("Unable to encode barcode for this ID format.");
+          console.error("Barcode generation error:", fallbackErr);
+        }
       }
-    }
+    }).catch((err) => {
+      console.error("Failed to load barcode/qrcode modules:", err);
+    });
 
     return () => {
       cancelled = true;
