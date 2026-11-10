@@ -22,7 +22,7 @@ export const metadata: Metadata = {
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "Inventory Tracker NFC Station",
+    title: "Inventory Tracker Equipment Checkout",
   },
   icons: {
     icon: [

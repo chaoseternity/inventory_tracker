@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState, useCallback } from "react";
 import {
-  Nfc,
   Barcode,
   RotateCcw,
   CheckCircle2,
@@ -10,7 +9,6 @@ import {
   XCircle,
   Clock,
   Package,
-  Radio,
   Sparkles,
   ArrowDownLeft,
   ArrowUpRight,
@@ -622,18 +620,35 @@ export function NFCStationClient({
     []
   );
 
-  // 1. NFC CARD RECOGNITION HANDLER (WITH OFFLINE CACHE FALLBACK)
+  // 1. MEMBER BARCODE RECOGNITION HANDLER (WITH OFFLINE CACHE FALLBACK)
   const handleNfcScanned = useCallback(
     async (rawCardValue: string) => {
       if (isSyncingRef.current) return; // station locked while syncing
       const val = rawCardValue.trim();
       if (!val) return;
 
+      // Prevent accidentally scanning an equipment barcode as a member barcode
+      const maybeEquipmentBySerial = equipmentListRef.current.find(
+        (e) => e.serial_number && e.serial_number.toLowerCase() === val.toLowerCase()
+      );
+      if (
+        maybeEquipmentBySerial &&
+        !cardsList.some((c) => c.nfc_value.toLowerCase() === val.toLowerCase())
+      ) {
+        playSound("warning");
+        setNfcInput("");
+        setStatusMessage({
+          text: `"${maybeEquipmentBySerial.name}" is an equipment barcode (${val}). Please scan a member barcode first to begin checkout or return.`,
+          type: "warning",
+        });
+        return;
+      }
+
       setIsProcessing(true);
-      setStatusMessage({ text: `Recognizing NFC card: ${val}...`, type: "info" });
+      setStatusMessage({ text: `Recognizing member barcode: ${val}...`, type: "info" });
       playSound("scan");
 
-      // Offline fallback: recognise the card from this station's local cache.
+      // Offline fallback: recognise the member barcode from this station's local cache.
       const recognizeFromCache = () => {
         const cachedMember = getCachedMemberData(val);
         if (cachedMember) {
@@ -641,7 +656,7 @@ export function NFCStationClient({
           setStationMode("card_active");
           setNfcInput("");
           setStatusMessage({
-            text: `[Offline Mode] Recognized Card: ${cachedMember.card.member_name} (${cachedMember.card.nfc_value})`,
+            text: `[Offline Mode] Recognized Member: ${cachedMember.card.member_name} (${cachedMember.card.nfc_value})`,
             type: "info",
           });
           playSound("success");
@@ -662,20 +677,20 @@ export function NFCStationClient({
           setStationMode("card_active");
           setNfcInput("");
           setStatusMessage({
-            text: `[Offline Mode] Recognized Card: ${foundCard.member_name} (${foundCard.nfc_value})`,
+            text: `[Offline Mode] Recognized Member: ${foundCard.member_name} (${foundCard.nfc_value})`,
             type: "info",
           });
           playSound("success");
           return;
         }
 
-        // Unregistered card offline
+        // Unregistered barcode offline
         playSound("error");
         setUnregisteredCard(val);
         setNewMemberName("");
         setNewCardNotes("");
         setStatusMessage({
-          text: `[Offline Mode] NFC Card "${val}" not recognized. Register it below.`,
+          text: `[Offline Mode] Member barcode "${val}" not recognized. Register it below.`,
           type: "warning",
         });
       };
@@ -691,7 +706,7 @@ export function NFCStationClient({
         if (result.kind === "error") {
           playSound("error");
           setStatusMessage({
-            text: `Could not look up NFC card "${val}": ${result.message}`,
+            text: `Could not look up member barcode "${val}": ${result.message}`,
             type: "error",
           });
           return;
@@ -709,7 +724,7 @@ export function NFCStationClient({
           setStationMode("card_active");
           setNfcInput("");
           setStatusMessage({
-            text: `Recognized NFC Card: ${json.card.member_name} (${json.card.nfc_value})`,
+            text: `Recognized Member: ${json.card.member_name} (${json.card.nfc_value})`,
             type: "success",
           });
           playSound("success");
@@ -719,7 +734,7 @@ export function NFCStationClient({
           setNewMemberName("");
           setNewCardNotes("");
           setStatusMessage({
-            text: `NFC Card "${val}" is not in database. Register it to proceed.`,
+            text: `Member barcode "${val}" is not in database. Register it to proceed.`,
             type: "warning",
           });
         }
@@ -727,7 +742,7 @@ export function NFCStationClient({
         setIsProcessing(false);
       }
     },
-    [setIsProcessing]
+    [cardsList, setIsProcessing]
   );
 
   // 2. OPEN SCANNING POPUP PAGE
@@ -822,7 +837,7 @@ export function NFCStationClient({
         if (!isCheckedOutUnderThisCard) {
           playSound("warning");
           setPopupMessage({
-            text: `"${foundEquipment.name}" is not checked out under this NFC Card.`,
+            text: `"${foundEquipment.name}" is not checked out under this member.`,
             type: "warning",
           });
           return;
@@ -1013,7 +1028,7 @@ export function NFCStationClient({
           member_name: rawName,
           notes: rawNotes,
         },
-        description: `Register card "${rawName}" (${rawNfc})`,
+        description: `Register barcode "${rawName}" (${rawNfc})`,
         nfcValue: rawNfc,
         memberName: rawName,
         occurredAt,
@@ -1028,7 +1043,7 @@ export function NFCStationClient({
       setNewMemberName("");
       setNewCardNotes("");
       setStatusMessage({
-        text: `[Offline Mode] Card registered locally for ${rawName}. Will sync when WiFi reconnects.`,
+        text: `[Offline Mode] Barcode registered locally for ${rawName}. Will sync when WiFi reconnects.`,
         type: "success",
       });
       await handleNfcScanned(rawNfc);
@@ -1183,13 +1198,13 @@ export function NFCStationClient({
           <Logo size="xl" iconOnly={true} />
           <div>
             <div className="flex items-center gap-2">
-              <h1 className="text-2xl font-bold tracking-tight">NFC Equipment Station</h1>
+              <h1 className="text-2xl font-bold tracking-tight">Equipment Checkout</h1>
               <Badge variant="outline" className="hidden sm:inline-flex text-[11px] font-bold uppercase tracking-wider bg-primary/5 border-primary/30 text-primary">
                 Inventory Tracker
               </Badge>
             </div>
             <p className="text-xs text-muted-foreground">
-              Equipment checkout &amp; return workstation
+              Barcode-powered equipment checkout &amp; return workstation
             </p>
           </div>
         </div>
@@ -1230,7 +1245,7 @@ export function NFCStationClient({
             className="gap-1.5 text-xs font-semibold"
           >
             <IdCard className="h-3.5 w-3.5" />
-            Club NFC Cards ({cardsList.length})
+            Member Barcodes ({cardsList.length})
           </Button>
 
           {stationMode === "card_active" && (
@@ -1241,7 +1256,7 @@ export function NFCStationClient({
               className="gap-2 border-primary/30 hover:bg-primary/10"
             >
               <RotateCcw className="h-4 w-4" />
-              Finish / Switch Card
+              Finish / Switch Member
             </Button>
           )}
 
@@ -1308,8 +1323,8 @@ export function NFCStationClient({
                 : "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30"
             )}
           >
-            <Radio className="h-3 w-3" />
-            {stationMode === "awaiting_nfc" ? "Waiting for NFC Tap" : "NFC Card Active"}
+            <Barcode className="h-3 w-3" />
+            {stationMode === "awaiting_nfc" ? "Waiting for Member Barcode" : "Member Active"}
           </Badge>
         </div>
       </div>
@@ -1344,7 +1359,7 @@ export function NFCStationClient({
         </div>
       )}
 
-      {/* STATE 1: AWAITING NFC CARD SCAN */}
+      {/* STATE 1: AWAITING MEMBER BARCODE SCAN */}
       {stationMode === "awaiting_nfc" && (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           {/* Main Hero Card */}
@@ -1358,23 +1373,23 @@ export function NFCStationClient({
 
             <div className="relative mb-5">
               <div className="w-20 h-20 rounded-full bg-primary/10 border-2 border-primary/30 flex items-center justify-center shadow-lg animate-pulse">
-                <Nfc className="h-10 w-10 text-primary" />
+                <Barcode className="h-10 w-10 text-primary" />
               </div>
               <div className="absolute -inset-2 rounded-full border border-primary/20 animate-ping pointer-events-none" />
             </div>
 
             <h2 className="text-xl sm:text-2xl font-bold tracking-tight mb-1">
-              Scan Member NFC Card
+              Scan Member Barcode
             </h2>
             <span className="text-xs font-semibold uppercase tracking-wider text-primary/80 mb-2 block">
-              Inventory Tracker Station
+              Equipment Checkout Station
             </span>
             <p className="text-sm text-muted-foreground max-w-md mb-6">
-              Hold or tap the member&apos;s physical NFC card on the USB scanner connected to this
-              laptop.
+              Scan the member&apos;s ID or badge barcode using the external barcode scanner connected
+              to this laptop.
             </p>
 
-            {/* Input field for manual or USB typing */}
+            {/* Input field for manual or external barcode scanner */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -1387,7 +1402,7 @@ export function NFCStationClient({
                 type="text"
                 value={nfcInput}
                 onChange={(e) => setNfcInput(e.target.value)}
-                placeholder="Or type NFC Card Value manually..."
+                placeholder="Scan barcode or type Member ID manually..."
                 disabled={isProcessing || isSyncing}
                 className="h-11 rounded-xl text-sm font-mono"
               />
@@ -1402,28 +1417,28 @@ export function NFCStationClient({
 
             <div className="flex flex-wrap items-center justify-center gap-2 text-xs text-muted-foreground mt-6">
               <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-muted/60 border">
-                <Laptop className="h-3.5 w-3.5 text-primary" /> USB NFC Scanner Active
+                <ScanLine className="h-3.5 w-3.5 text-primary" /> External Barcode Scanner Ready
               </span>
             </div>
           </Card>
 
-          {/* Quick Tap Simulator */}
+          {/* Quick Scan Simulator */}
           <Card className="rounded-2xl flex flex-col">
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-semibold flex items-center justify-between">
-                <span>Club NFC Cards ({cardsList.length})</span>
+                <span>Member Barcodes ({cardsList.length})</span>
                 <Badge variant="outline" className="text-[10px]">
                   Simulator
                 </Badge>
               </CardTitle>
               <CardDescription className="text-xs">
-                Click a card below to simulate scanner tap:
+                Click a member below to simulate barcode scan:
               </CardDescription>
             </CardHeader>
             <CardContent className="flex-1 overflow-y-auto max-h-80 space-y-2 pr-2">
               {cardsList.length === 0 ? (
                 <div className="text-center py-6 text-xs text-muted-foreground">
-                  No NFC cards registered yet. Tap &quot;+ Register New Card&quot; to add one.
+                  No member barcodes registered yet. Click &quot;+ Register New Barcode&quot; to add one.
                 </div>
               ) : (
                 cardsList.map((card) => (
@@ -1455,27 +1470,27 @@ export function NFCStationClient({
                 variant="outline"
                 size="sm"
                 onClick={() => {
-                  setUnregisteredCard(`NFC-CARD-${String(cardsList.length + 1).padStart(3, "0")}`);
+                  setUnregisteredCard(`MEM-${String(cardsList.length + 1).padStart(3, "0")}`);
                   setNewMemberName("");
                   setNewCardNotes("");
                 }}
                 className="w-full text-xs font-semibold gap-1.5 mt-2"
               >
                 <PlusCircle className="h-3.5 w-3.5" />
-                Register New Card
+                Register New Barcode
               </Button>
             </CardContent>
           </Card>
         </div>
       )}
 
-      {/* STATE 2: NFC CARD ACTIVE DASHBOARD */}
+      {/* STATE 2: MEMBER ACTIVE DASHBOARD */}
       {stationMode === "card_active" && cardData && (
         <div className="space-y-6">
-          {/* Card Header with TWO BIG ACTION BUTTONS */}
+          {/* Member Header with TWO BIG ACTION BUTTONS */}
           <Card className="rounded-2xl border-primary/30 bg-gradient-to-r from-primary/10 via-background to-primary/5 p-6 shadow-sm">
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-              {/* Card Profile */}
+              {/* Member Profile */}
               <div className="flex items-center gap-4">
                 <div className="h-16 w-16 rounded-2xl border border-primary/40 flex items-center justify-center shadow-xs overflow-hidden bg-[#0b0f19]">
                   <Logo size="lg" iconOnly={true} />
@@ -1494,7 +1509,7 @@ export function NFCStationClient({
                     <p className="text-xs text-muted-foreground mt-0.5">{cardData.card.notes}</p>
                   )}
                   <div className="text-[11px] text-muted-foreground mt-1">
-                    Card Registered: {formatDate(cardData.card.created_at)}
+                    Barcode Registered: {formatDate(cardData.card.created_at)}
                   </div>
                 </div>
               </div>
@@ -1571,7 +1586,7 @@ export function NFCStationClient({
                   <Package className="h-10 w-10 text-muted-foreground/40 mx-auto mb-3" />
                   <h3 className="font-semibold text-base mb-1">No equipment currently checked out</h3>
                   <p className="text-xs text-muted-foreground max-w-sm mx-auto mb-4">
-                    This NFC card has no active equipment checkouts. Tap &quot;Checkout Equipments&quot; above
+                    This member has no active equipment checkouts. Tap &quot;Checkout Equipments&quot; above
                     to start scanning items to borrow.
                   </p>
                   <Button
@@ -1646,7 +1661,7 @@ export function NFCStationClient({
                     {cardData.history.length === 0 ? (
                       <tr>
                         <td colSpan={5} className="p-6 text-center text-muted-foreground">
-                          No past checkout records for this NFC card.
+                          No past checkout records for this member barcode.
                         </td>
                       </tr>
                     ) : (
@@ -1725,7 +1740,7 @@ export function NFCStationClient({
                   </Badge>
                 </div>
                 <p className="text-xs text-neutral-400">
-                  Card: <strong className="text-white">{cardData.card.member_name}</strong> (
+                  Member: <strong className="text-white">{cardData.card.member_name}</strong> (
                   <span className="font-mono">{cardData.card.nfc_value}</span>)
                 </p>
               </div>
@@ -1932,7 +1947,7 @@ export function NFCStationClient({
               <span className="font-semibold text-foreground">
                 &ldquo;{collisionPrompt?.equipment.name}&rdquo;
               </span>{" "}
-              is already checked out under this NFC Card (
+              is already checked out under this member (
               <span className="font-semibold text-foreground">{cardData?.card.member_name}</span>).
               <br />
               <br />
@@ -1970,7 +1985,7 @@ export function NFCStationClient({
         </DialogContent>
       </Dialog>
 
-      {/* DIALOG 2: REGISTER UNREGISTERED NFC CARD (SEPARATE FROM USERS) */}
+      {/* DIALOG 2: REGISTER UNREGISTERED MEMBER BARCODE (SEPARATE FROM USERS) */}
       <Dialog
         open={unregisteredCard !== null}
         onOpenChange={lockedOpenChange((open) => {
@@ -1980,12 +1995,12 @@ export function NFCStationClient({
         <DialogContent className="sm:max-w-md rounded-2xl">
           <DialogHeader>
             <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center mb-2 border border-primary/20">
-              <Nfc className="h-6 w-6" />
+              <Barcode className="h-6 w-6" />
             </div>
-            <DialogTitle className="text-lg font-bold">Register New NFC Card</DialogTitle>
+            <DialogTitle className="text-lg font-bold">Register New Member Barcode</DialogTitle>
             <DialogDescription className="text-sm pt-1">
-              Card UID <code className="font-mono text-primary font-semibold">{unregisteredCard}</code>{" "}
-              is not in the database yet. Enter the member details to register this card:
+              Barcode <code className="font-mono text-primary font-semibold">{unregisteredCard}</code>{" "}
+              is not in the database yet. Enter the member details to register this barcode:
             </DialogDescription>
           </DialogHeader>
 
@@ -1994,7 +2009,7 @@ export function NFCStationClient({
               <label className="text-xs font-semibold block mb-1">Member Name / Label *</label>
               <Input
                 type="text"
-                placeholder="e.g. John Doe or Crew Card #04"
+                placeholder="e.g. John Doe or Crew Member #04"
                 value={newMemberName}
                 onChange={(e) => setNewMemberName(e.target.value)}
                 className="h-11 rounded-xl"
@@ -2029,28 +2044,28 @@ export function NFCStationClient({
               className="rounded-xl font-semibold gap-1.5"
             >
               <PlusCircle className="h-4 w-4" />
-              Save Card & Continue
+              Save Barcode &amp; Continue
             </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
 
-      {/* DIALOG 3: MANAGE ALL CLUB NFC CARDS */}
+      {/* DIALOG 3: MANAGE ALL MEMBER BARCODES */}
       <Dialog open={isManageCardsOpen} onOpenChange={lockedOpenChange(setIsManageCardsOpen)}>
         <DialogContent className="sm:max-w-xl rounded-2xl max-h-[85vh] flex flex-col">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold flex items-center gap-2">
               <IdCard className="h-5 w-5 text-primary" />
-              Registered Club NFC Cards
+              Registered Member Barcodes
             </DialogTitle>
             <DialogDescription className="text-xs">
-              List of all physical NFC cards registered in the database for equipment checkouts.
+              List of all member barcodes registered in the database for equipment checkouts.
             </DialogDescription>
           </DialogHeader>
 
           <div className="flex-1 overflow-y-auto space-y-2 py-2 pr-1">
             {cardsList.length === 0 ? (
-              <p className="text-center py-6 text-xs text-muted-foreground">No cards registered yet.</p>
+              <p className="text-center py-6 text-xs text-muted-foreground">No member barcodes registered yet.</p>
             ) : (
               cardsList.map((c) => (
                 <div
@@ -2071,7 +2086,7 @@ export function NFCStationClient({
                     }}
                     className="text-xs font-medium"
                   >
-                    Select Card
+                    Select Member
                   </Button>
                 </div>
               ))
@@ -2097,10 +2112,10 @@ export function NFCStationClient({
           <DialogHeader>
             <div className="flex items-center gap-2 text-primary mb-1">
               <Laptop className="h-5 w-5" />
-              <DialogTitle>Install NFC Station App</DialogTitle>
+              <DialogTitle>Install Equipment Checkout App</DialogTitle>
             </div>
             <DialogDescription>
-              Run Inventory Tracker NFC Station in its own dedicated, borderless desktop window on this laptop.
+              Run Inventory Tracker Equipment Checkout in its own dedicated, borderless desktop window on this laptop.
             </DialogDescription>
           </DialogHeader>
 
@@ -2119,7 +2134,7 @@ export function NFCStationClient({
                 </li>
                 <li>
                   Or click the browser menu (<strong>...</strong> or <strong>⋮</strong>) &rarr;{" "}
-                  <strong>Apps</strong> &rarr; <strong>Install Inventory Tracker NFC Station</strong>.
+                  <strong>Apps</strong> &rarr; <strong>Install Inventory Tracker Equipment Checkout</strong>.
                 </li>
                 <li>Click <strong>Install</strong> to confirm.</li>
               </ol>
@@ -2131,7 +2146,7 @@ export function NFCStationClient({
                 Dedicated Kiosk App:
               </p>
               <p className="text-[11px] leading-relaxed text-muted-foreground">
-                Once installed, a dedicated shortcut appears on your Windows Desktop and Taskbar. When clicked, it launches directly into this NFC Station with no browser URL bar or tabs, perfectly configured for USB card readers and barcode scanners.
+                Once installed, a dedicated shortcut appears on your Windows Desktop and Taskbar. When clicked, it launches directly into Equipment Checkout with no browser URL bar or tabs, perfectly configured for external barcode scanners.
               </p>
             </div>
           </div>
@@ -2177,7 +2192,7 @@ export function NFCStationClient({
                 </Badge>
               </div>
               <p className="text-[11px] text-muted-foreground leading-relaxed">
-                When you tap NFC cards or scan barcodes while WiFi is cut out, operations are safely preserved on this device. As soon as connectivity returns, they will be uploaded automatically.
+                When you scan member or equipment barcodes while WiFi is cut out, operations are safely preserved on this device. As soon as connectivity returns, they will be uploaded automatically.
               </p>
             </div>
 
@@ -2216,7 +2231,7 @@ export function NFCStationClient({
                       <p className="font-medium text-foreground text-xs">{item.description}</p>
                       {(item.memberName || item.nfcValue) && (
                         <p className="text-[10px] text-muted-foreground">
-                          Card: {item.memberName ?? "Unknown member"}
+                          Member: {item.memberName ?? "Unknown member"}
                           {item.nfcValue ? ` (${item.nfcValue})` : ""}
                         </p>
                       )}
@@ -2318,7 +2333,7 @@ export function NFCStationClient({
                           : "text-purple-600 dark:text-purple-400 border-purple-500/30 bg-purple-500/5"
                       )}
                     >
-                      {r.type === "register_card" ? "register card" : r.type}
+                      {r.type === "register_card" ? "register barcode" : r.type}
                     </Badge>
                     <span className="font-semibold text-foreground truncate">{r.description}</span>
                   </div>
@@ -2402,7 +2417,7 @@ export function NFCStationClient({
               {`Syncing ${syncTotal} offline action${syncTotal === 1 ? "" : "s"} — station locked, please wait`}
             </h2>
             <p className="text-xs text-muted-foreground">
-              Uploading actions recorded while the station was offline. Card taps, barcode scans
+              Uploading actions recorded while the station was offline. Barcode scans
               and buttons are disabled until the sync finishes.
             </p>
             {syncProgress && syncProgress.total > 0 && (

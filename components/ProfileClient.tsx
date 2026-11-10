@@ -237,7 +237,7 @@ export function ProfileClient({
             Events ({data.events.length})
           </TabsTrigger>
           <TabsTrigger value="account" className="text-xs md:text-sm">
-            Account & NFC
+            Account &amp; Barcode
           </TabsTrigger>
         </TabsList>
 
@@ -652,15 +652,15 @@ export function ProfileClient({
               </CardContent>
             </Card>
 
-            {/* NFC Card Details Card */}
+            {/* Member Barcode Details Card */}
             <Card className="border shadow-2xs">
               <CardHeader className="pb-3">
                 <CardTitle className="text-base flex items-center gap-2">
                   <CreditCard className="h-4 w-4 text-purple-600" />
-                  NFC Station Card
+                  Member Barcode / ID
                 </CardTitle>
                 <CardDescription className="text-xs">
-                  Physical tap-to-checkout card associated with this member.
+                  Physical scan-to-checkout barcode associated with this member.
                 </CardDescription>
               </CardHeader>
               <CardContent className="space-y-3 text-xs">
@@ -668,19 +668,19 @@ export function ProfileClient({
                   <>
                     <div className="flex items-center gap-2 bg-emerald-500/10 border border-emerald-500/20 text-emerald-800 dark:text-emerald-300 p-2.5 rounded-lg">
                       <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-400" />
-                      <span>Physical NFC Card linked and active for tap checkouts.</span>
+                      <span>Member Barcode linked and active for equipment checkouts.</span>
                     </div>
 
                     <div className="flex justify-between border-b pb-2">
-                      <span className="text-muted-foreground">Card Member Name</span>
+                      <span className="text-muted-foreground">Member Name</span>
                       <span className="font-medium">{data.nfcCard.member_name}</span>
                     </div>
                     <div className="flex justify-between border-b pb-2">
-                      <span className="text-muted-foreground">NFC Card ID / UID</span>
+                      <span className="text-muted-foreground">Member Barcode / ID</span>
                       <span className="font-mono font-medium">{data.nfcCard.nfc_value}</span>
                     </div>
                     <div className="flex justify-between border-b pb-2">
-                      <span className="text-muted-foreground">Card Linked Date</span>
+                      <span className="text-muted-foreground">Barcode Linked Date</span>
                       <span className="font-medium">{fmtDate(data.nfcCard.created_at)}</span>
                     </div>
                     {data.nfcCard.notes && (
@@ -693,14 +693,14 @@ export function ProfileClient({
                 ) : (
                   <div className="py-6 text-center text-muted-foreground space-y-2">
                     <CreditCard className="h-8 w-8 mx-auto opacity-30" />
-                    <p className="font-medium">No NFC Card Registered</p>
+                    <p className="font-medium">No Member Barcode Registered</p>
                     <p className="text-[11px] max-w-xs mx-auto">
-                      Members can have a physical NFC card mapped to their account at the NFC Station.
+                      Members can have a physical barcode mapped to their account at Equipment Checkout.
                     </p>
                     {isAdmin && (
                       <Link href="/dashboard/nfc" className="inline-block pt-2">
                         <Button variant="outline" size="sm" className="text-xs gap-1">
-                          Go to NFC Station <ExternalLink className="h-3 w-3" />
+                          Go to Equipment Checkout <ExternalLink className="h-3 w-3" />
                         </Button>
                       </Link>
                     )}

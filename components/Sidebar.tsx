@@ -12,7 +12,7 @@ import {
   Calendar,
   Tag,
   QrCode,
-  Nfc,
+  Barcode,
   Users as UsersIcon,
   Moon,
   Sun,
@@ -54,7 +54,7 @@ const navGroups: NavGroup[] = [
       { href: "/dashboard/events", label: "Events", icon: Calendar, roles: ["admin", "verified", "viewer"] },
       { href: "/dashboard/map", label: "Storage Map", icon: Boxes, roles: ["admin", "verified", "viewer"] },
       { href: "/dashboard/scan", label: "Scan QR", icon: QrCode, roles: ["admin", "verified", "viewer"] },
-      { href: "/dashboard/nfc", label: "NFC Station", icon: Nfc, roles: ["admin", "verified"] },
+      { href: "/dashboard/nfc", label: "Equipment Checkout", icon: Barcode, roles: ["admin", "verified"] },
     ],
   },
   {

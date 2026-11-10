@@ -723,7 +723,7 @@ describe("offlineSync engine", () => {
       (global as any).window.confirm = confirmMock;
 
       expect(confirmOfflineSignOut()).toBe(false);
-      expect(confirmMock).toHaveBeenCalledWith(expect.stringContaining("1 offline NFC station action"));
+      expect(confirmMock).toHaveBeenCalledWith(expect.stringContaining("1 offline Equipment Checkout action"));
       expect(getCachedMemberData("CARD-1")).not.toBeNull();
     });
 

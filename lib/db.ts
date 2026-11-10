@@ -1654,7 +1654,7 @@ export async function nfcCheckout(params: {
     equipment_id: params.equipmentId,
     checked_out_by: null,
     checked_out_by_name: card.member_name,
-    notes: params.notes || "Checked out via NFC Station",
+    notes: params.notes || "Checked out via Equipment Checkout",
     checkout_location: params.checkout_location,
     nfc_value: trimmed,
     nfc_id: trimmed,

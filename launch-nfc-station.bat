@@ -1,10 +1,10 @@
 @echo off
-title Inventory Tracker NFC Station Kiosk
+title Inventory Tracker Equipment Checkout Kiosk
 echo ===================================================
-echo   Inventory Tracker NFC Station - Dedicated Laptop Kiosk
+echo   Inventory Tracker Equipment Checkout - Dedicated Laptop Kiosk
 echo ===================================================
 echo.
-echo Launching NFC Station in dedicated app window...
+echo Launching Equipment Checkout in dedicated app window...
 
 :: Target URL - change this if your site is hosted on a remote server/domain
 set STATION_URL=http://localhost:3000/dashboard/nfc

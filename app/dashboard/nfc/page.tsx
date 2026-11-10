@@ -4,8 +4,8 @@ import { redirect } from "next/navigation";
 import { NFCStationClient } from "@/components/NFCStationClient";
 
 export const metadata = {
-  title: "Inventory Tracker NFC Station",
-  description: "NFC card member checkout and return workstation",
+  title: "Equipment Checkout — Inventory Tracker",
+  description: "Barcode member checkout and return workstation",
 };
 
 export default async function NFCPage() {

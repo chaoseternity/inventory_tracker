@@ -129,7 +129,7 @@ export async function POST(req: NextRequest) {
         const c = await nfcCheckout({
           equipmentId: item.id,
           nfcValue: cardValue,
-          notes: notes || "Checked out via NFC Station",
+          notes: notes || "Checked out via Equipment Checkout",
           checkout_location,
           occurredAt,
           expectedMemberName,
@@ -214,7 +214,7 @@ export async function POST(req: NextRequest) {
     const checkout = await nfcCheckout({
       equipmentId: equipment.id,
       nfcValue: cardValue,
-      notes: notes || "Checked out via NFC Station",
+      notes: notes || "Checked out via Equipment Checkout",
       checkout_location,
       occurredAt,
       expectedMemberName,
