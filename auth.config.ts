@@ -7,6 +7,14 @@ import Google from "next-auth/providers/google";
 import MicrosoftEntraId from "next-auth/providers/microsoft-entra-id";
 
 function getBaseUrl(fallbackBaseUrl: string): string {
+  // If a valid request base URL is provided (via NextAuth trustHost: true), respect it so
+  // users remain on the active domain (e.g. https://nushmedia.app) rather than being redirected away.
+  if (
+    fallbackBaseUrl &&
+    (fallbackBaseUrl.startsWith("http://") || fallbackBaseUrl.startsWith("https://"))
+  ) {
+    return fallbackBaseUrl;
+  }
   if (process.env.AUTH_URL && !process.env.AUTH_URL.includes("localhost")) {
     return process.env.AUTH_URL;
   }

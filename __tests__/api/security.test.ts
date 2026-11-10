@@ -247,6 +247,25 @@ describe("Security Audits & Vulnerability Guards", () => {
         expect(result).toBe("https://tracker.club/dashboard");
       }
     });
+
+    test("preserves request baseUrl even if AUTH_URL points to worker domain", async () => {
+      const originalAuthUrl = process.env.AUTH_URL;
+      try {
+        process.env.AUTH_URL = "https://inventory-tracker-website.workers.dev";
+        const { authConfig } = await import("@/auth.config");
+        const redirect = authConfig.callbacks?.redirect;
+        if (redirect) {
+          const result = await redirect({ url: "/dashboard", baseUrl: "https://nushmedia.app" });
+          expect(result).toBe("https://nushmedia.app/dashboard");
+        }
+      } finally {
+        if (originalAuthUrl !== undefined) {
+          process.env.AUTH_URL = originalAuthUrl;
+        } else {
+          delete process.env.AUTH_URL;
+        }
+      }
+    });
   });
 
   describe("File Extension & MIME Type Restriction", () => {
