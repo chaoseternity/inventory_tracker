@@ -29,6 +29,10 @@ import {
   Edit3,
   Repeat,
   ImagePlus,
+  Mic,
+  MicOff,
+  Volume2,
+  VolumeX,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -135,6 +139,13 @@ export function SOPManager({ initialDocuments, role, userName }: SOPManagerProps
   const chatBottomRef = useRef<HTMLDivElement>(null);
   const chatInputRef = useRef<HTMLTextAreaElement>(null);
   const chatImageInputRef = useRef<HTMLInputElement>(null);
+
+  // Voice input & Speech Synthesis state
+  const [isListening, setIsListening] = useState(false);
+  const [speechSupported, setSpeechSupported] = useState(false);
+  const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null);
+  const [voiceError, setVoiceError] = useState<string | null>(null);
+  const recognitionRef = useRef<any>(null);
 
   const processChatImage = useCallback((file: File) => {
     if (!file.type.startsWith("image/")) {
@@ -758,8 +769,152 @@ export function SOPManager({ initialDocuments, role, userName }: SOPManagerProps
     }
   }
 
+  // Detect speech recognition support on client mount
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const hasSpeech = "SpeechRecognition" in window || "webkitSpeechRecognition" in window;
+      setSpeechSupported(hasSpeech);
+    }
+    return () => {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch {}
+      }
+      if (typeof window !== "undefined" && "speechSynthesis" in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
+
+  // Voice Speech-to-Text handler
+  const toggleVoiceInput = useCallback(() => {
+    if (!speechSupported) {
+      setVoiceError("Voice input is not supported in this browser. Please use Chrome, Edge, or Safari.");
+      return;
+    }
+
+    if (isListening) {
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.stop();
+        } catch {}
+      }
+      setIsListening(false);
+      return;
+    }
+
+    try {
+      const SpeechRecognitionClass =
+        (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+      if (!SpeechRecognitionClass) return;
+
+      const recognition = new SpeechRecognitionClass();
+      recognition.continuous = true;
+      recognition.interimResults = true;
+      recognition.lang = "en-SG";
+
+      let finalTranscript = "";
+      const startingQuery = inputQuery.trim();
+
+      recognition.onstart = () => {
+        setIsListening(true);
+        setVoiceError(null);
+      };
+
+      recognition.onresult = (event: any) => {
+        let interim = "";
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+          const chunk = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += (finalTranscript ? " " : "") + chunk.trim();
+          } else {
+            interim += chunk;
+          }
+        }
+        const fullTranscript = (finalTranscript + (interim ? " " + interim : "")).trim();
+        const combined = startingQuery ? `${startingQuery} ${fullTranscript}` : fullTranscript;
+        setInputQuery(combined);
+
+        if (chatInputRef.current) {
+          chatInputRef.current.style.height = "auto";
+          chatInputRef.current.style.height = `${Math.min(chatInputRef.current.scrollHeight, 160)}px`;
+        }
+      };
+
+      recognition.onerror = (event: any) => {
+        console.warn("Speech recognition error:", event.error);
+        if (event.error === "not-allowed" || event.error === "service-not-allowed") {
+          setVoiceError("Microphone permission was denied. Please allow microphone access in your browser address bar.");
+        } else if (event.error === "no-speech") {
+          // No speech detected, quietly ignore
+        } else {
+          setVoiceError(`Voice input: ${event.error}`);
+        }
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+        recognitionRef.current = null;
+      };
+
+      recognitionRef.current = recognition;
+      recognition.start();
+    } catch (err) {
+      console.error("Failed to start voice input:", err);
+      setIsListening(false);
+      setVoiceError("Could not access microphone.");
+    }
+  }, [speechSupported, isListening, inputQuery]);
+
+  // Text-to-Speech audio readback for assistant messages
+  const toggleSpeakMessage = useCallback((msgId: string, text: string) => {
+    if (typeof window === "undefined" || !("speechSynthesis" in window)) {
+      return;
+    }
+
+    if (speakingMsgId === msgId) {
+      window.speechSynthesis.cancel();
+      setSpeakingMsgId(null);
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    // Clean markdown before speaking
+    const cleanText = text
+      .replace(/[*_#`~>]/g, "")
+      .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+      .replace(/\n+/g, " ")
+      .trim();
+
+    if (!cleanText) return;
+
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = "en-SG";
+    utterance.rate = 1.0;
+
+    utterance.onend = () => {
+      setSpeakingMsgId(null);
+    };
+    utterance.onerror = () => {
+      setSpeakingMsgId(null);
+    };
+
+    setSpeakingMsgId(msgId);
+    window.speechSynthesis.speak(utterance);
+  }, [speakingMsgId]);
+
   // Handle Send Chat
   async function handleSendMessage(textToSend?: string) {
+    if (isListening && recognitionRef.current) {
+      try {
+        recognitionRef.current.stop();
+      } catch {}
+      setIsListening(false);
+    }
+
     const q = (textToSend || inputQuery).trim();
     if ((!q && !attachedImage) || chatLoading) return;
 
@@ -1085,6 +1240,34 @@ export function SOPManager({ initialDocuments, role, userName }: SOPManagerProps
                         </div>
                       </div>
                     )}
+
+                    {/* Read Aloud Button for Assistant Responses */}
+                    {m.role === "assistant" && !m.isError && (
+                      <div className="pt-1.5 flex items-center justify-end">
+                        <button
+                          type="button"
+                          onClick={() => toggleSpeakMessage(m.id, m.content)}
+                          className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-[11px] font-medium transition-colors ${
+                            speakingMsgId === m.id
+                              ? "bg-purple-100 text-purple-700 dark:bg-purple-950/60 dark:text-purple-300 font-semibold"
+                              : "text-muted-foreground hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/40"
+                          }`}
+                          title={speakingMsgId === m.id ? "Stop voice playback" : "Read answer aloud"}
+                        >
+                          {speakingMsgId === m.id ? (
+                            <>
+                              <VolumeX className="h-3 w-3 text-purple-600 animate-pulse" />
+                              <span>Stop audio</span>
+                            </>
+                          ) : (
+                            <>
+                              <Volume2 className="h-3 w-3" />
+                              <span>Read aloud</span>
+                            </>
+                          )}
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               ))}
@@ -1154,6 +1337,44 @@ export function SOPManager({ initialDocuments, role, userName }: SOPManagerProps
                 </div>
               )}
 
+              {/* Voice Listening Banner */}
+              {isListening && (
+                <div className="px-3.5 py-2 bg-red-50 dark:bg-red-950/40 border-b border-red-200 dark:border-red-900 flex items-center justify-between text-xs text-red-600 dark:text-red-400 animate-in fade-in duration-200">
+                  <span className="flex items-center gap-2 font-medium">
+                    <span className="relative flex h-2.5 w-2.5">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                      <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600"></span>
+                    </span>
+                    Listening to your voice... Speak your question now
+                  </span>
+                  <button
+                    type="button"
+                    onClick={toggleVoiceInput}
+                    className="text-[11px] font-semibold underline hover:text-red-700 dark:hover:text-red-300"
+                  >
+                    Done speaking
+                  </button>
+                </div>
+              )}
+
+              {/* Voice Error Notice */}
+              {voiceError && (
+                <div className="px-3.5 py-2 bg-amber-50 dark:bg-amber-950/40 border-b border-amber-200 dark:border-amber-900 flex items-center justify-between text-xs text-amber-700 dark:text-amber-400 animate-in fade-in duration-200">
+                  <span className="flex items-center gap-1.5">
+                    <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+                    {voiceError}
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setVoiceError(null)}
+                    className="text-amber-600 hover:text-amber-800 dark:hover:text-amber-300 p-0.5"
+                    title="Dismiss"
+                  >
+                    <X className="h-3.5 w-3.5" />
+                  </button>
+                </div>
+              )}
+
               <div className="p-3 flex gap-2 items-end">
                 <input
                   ref={chatImageInputRef}
@@ -1176,6 +1397,32 @@ export function SOPManager({ initialDocuments, role, userName }: SOPManagerProps
                   title="Attach an image (or paste/drag into box)"
                 >
                   <ImagePlus className="h-4.5 w-4.5" />
+                </Button>
+
+                <Button
+                  type="button"
+                  variant={isListening ? "default" : "outline"}
+                  size="icon"
+                  onClick={toggleVoiceInput}
+                  disabled={chatLoading}
+                  className={`h-10 w-10 shrink-0 transition-all ${
+                    isListening
+                      ? "bg-red-600 hover:bg-red-700 text-white animate-pulse border-red-600 shadow-md ring-2 ring-red-400"
+                      : "text-muted-foreground hover:text-purple-600 hover:bg-purple-50 dark:hover:bg-purple-950/40"
+                  }`}
+                  title={
+                    !speechSupported
+                      ? "Voice input is not supported in this browser (supported in Chrome, Edge, Safari)"
+                      : isListening
+                      ? "Listening to voice... click to stop recording"
+                      : "Ask with voice (Speech to Text)"
+                  }
+                >
+                  {isListening ? (
+                    <MicOff className="h-4.5 w-4.5" />
+                  ) : (
+                    <Mic className="h-4.5 w-4.5" />
+                  )}
                 </Button>
 
                 <textarea
