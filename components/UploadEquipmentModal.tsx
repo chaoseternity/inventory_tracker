@@ -10,12 +10,8 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import {
-  parseEquipmentExcel,
-  BATCH_CHUNK_SIZE,
-  MAX_IMPORT_ROWS,
-  type ParsedEquipmentItem,
-} from "@/lib/excel";
+import { BATCH_CHUNK_SIZE, MAX_IMPORT_ROWS } from "@/lib/excel-constants";
+import type { ParsedEquipmentItem } from "@/lib/excel";
 import type { Equipment } from "@/lib/types";
 import { readErrorMessage, networkErrorMessage } from "@/lib/fetch-error";
 import {
@@ -135,6 +131,7 @@ export function UploadEquipmentModal({
 
     try {
       const buffer = await selectedFile.arrayBuffer();
+      const { parseEquipmentExcel } = await import("@/lib/excel");
       const items = parseEquipmentExcel(buffer);
       if (items.length === 0) {
         setParseError("No valid equipment rows found in the uploaded file. Please check column headers.");

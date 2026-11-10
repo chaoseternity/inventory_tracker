@@ -45,7 +45,6 @@ import {
 } from "@/components/ui/dialog";
 import { SOPPreviewModal } from "./SOPPreviewModal";
 import type { SOPDocument, SOPCitation, AIChatMessage, Role } from "@/lib/types";
-import JSZip from "jszip";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { safeMarkdownComponents } from "@/components/safe-markdown";
@@ -293,6 +292,7 @@ export function SOPManager({ initialDocuments, role, userName }: SOPManagerProps
     // 1. Microsoft Word (.docx) client extraction via JSZip
     if (nameLower.endsWith(".docx")) {
       try {
+        const JSZip = (await import("jszip")).default;
         const arrayBuffer = await file.arrayBuffer();
         const zip = await JSZip.loadAsync(arrayBuffer);
         const docXmlFile = zip.file("word/document.xml");

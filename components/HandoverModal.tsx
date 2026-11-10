@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import QRCode from "qrcode";
 import { Copy, Check, Clock, QrCode, ShieldCheck, Loader2 } from "lucide-react";
 import {
   Dialog,
@@ -83,6 +82,8 @@ export function HandoverModal({
         setHandoverData(data);
 
         // Generate QR code (encodes the plain "HD-XXXXXX" code)
+        const QRCodeMod = await import("qrcode");
+        const QRCode = (QRCodeMod as any).default ?? QRCodeMod;
         const qrUrl = await QRCode.toDataURL(data.code, {
           width: 260,
           margin: 1.5,

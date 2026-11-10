@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Plus, Package, Download, Upload, Bell, Loader2, Radio } from "lucide-react";
 import { AddEquipmentModal } from "@/components/AddEquipmentModal";
 import { UploadEquipmentModal } from "@/components/UploadEquipmentModal";
-import { generateEquipmentExcel } from "@/lib/excel";
 import type { Equipment, Role } from "@/lib/types";
 import { APP_TIMEZONE, parseDueDate } from "@/lib/timezone";
 import { useNow } from "@/lib/use-now";
@@ -105,9 +104,10 @@ export function DashboardClient({ initialData, role, userName }: DashboardClient
     router.refresh();
   }
 
-  function handleDownload() {
+  async function handleDownload() {
     try {
       setIsDownloading(true);
+      const { generateEquipmentExcel } = await import("@/lib/excel");
       const buffer = generateEquipmentExcel(items);
       const blob = new Blob([buffer as Uint8Array<ArrayBuffer>], {
         type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
