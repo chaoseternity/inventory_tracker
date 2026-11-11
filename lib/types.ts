@@ -192,6 +192,22 @@ export interface SOPDocument {
   updated_at: string;
 }
 
+export interface ResourceItem {
+  id: number;
+  title: string;
+  description: string | null;
+  section: EventSection;
+  session_date: string | null;
+  file_name: string;
+  file_type: string;
+  file_size: number;
+  r2_key: string;
+  uploaded_by: number | null;
+  uploaded_by_name?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface SOPCitation {
   document_id: number;
   document_title: string;

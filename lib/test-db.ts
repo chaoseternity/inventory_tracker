@@ -136,6 +136,21 @@ export const SCHEMA_SQL = `
     updated_at   TEXT    NOT NULL DEFAULT (datetime('now'))
   );
 
+  CREATE TABLE IF NOT EXISTS resources (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    title        TEXT    NOT NULL,
+    description  TEXT,
+    section      TEXT    NOT NULL CHECK(section IN ('photo', 'video', 'av')),
+    session_date TEXT,
+    file_name    TEXT    NOT NULL,
+    file_type    TEXT    NOT NULL DEFAULT 'application/octet-stream',
+    file_size    INTEGER NOT NULL,
+    r2_key       TEXT    NOT NULL,
+    uploaded_by  INTEGER REFERENCES users(id) ON DELETE SET NULL,
+    created_at   TEXT    NOT NULL DEFAULT (datetime('now')),
+    updated_at   TEXT    NOT NULL DEFAULT (datetime('now'))
+  );
+
   CREATE TABLE IF NOT EXISTS checkout_reminders (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     checkout_id   INTEGER NOT NULL REFERENCES checkouts(id) ON DELETE CASCADE,
@@ -213,6 +228,8 @@ export const SCHEMA_SQL = `
   CREATE UNIQUE INDEX IF NOT EXISTS idx_reminders_unique_window ON checkout_reminders(checkout_id, reminder_type, window_key);
   CREATE UNIQUE INDEX IF NOT EXISTS idx_tags_name_lower ON tags(LOWER(name));
   CREATE INDEX IF NOT EXISTS idx_event_equipment_equipment ON event_equipment(equipment_id);
+  CREATE INDEX IF NOT EXISTS idx_resources_section ON resources(section);
+  CREATE INDEX IF NOT EXISTS idx_resources_created_at ON resources(created_at DESC);
 `;
 
 let testDbInstance: Database.Database | null = null;

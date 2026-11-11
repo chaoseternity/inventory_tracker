@@ -1,11 +1,13 @@
 /**
- * Cloudflare R2 object storage helper for original SOP documents (.pdf, .docx, etc.).
+ * Cloudflare R2 object storage helper for SOP documents (`sop/`) and Resource Bank
+ * session materials (`resources/`).
  *
  * Uses the `SOP_BUCKET` R2 binding defined in `wrangler.toml` when running on Cloudflare
  * Workers, and returns `null` cleanly outside Cloudflare (e.g. local Next.js dev, Vercel,
  * or Jest unless a mock bucket is registered via `setTestSopBucket`).
  */
 import type { R2Bucket, R2ObjectBody } from "@cloudflare/workers-types";
+import type { EventSection } from "./types";
 
 let testBucketOverride: R2Bucket | null | undefined = undefined;
 let cachedBucket: R2Bucket | null = null;
@@ -23,7 +25,7 @@ export function setTestSopBucket(bucket: R2Bucket | null | undefined): void {
 }
 
 /**
- * Resolves the `SOP_BUCKET` R2 binding if available in the current runtime.
+ * Resolves the R2 bucket binding (`SOP_BUCKET`) if available in the current runtime.
  */
 export async function getSopBucket(): Promise<R2Bucket | null> {
   if (testBucketOverride !== undefined) return testBucketOverride;
@@ -54,10 +56,9 @@ export async function getSopBucket(): Promise<R2Bucket | null> {
   return null;
 }
 
-/** Validates that an R2 object key belongs to the `sop/` prefix and has no path traversal. */
-export function isValidSopObjectKey(key: string | null | undefined): key is string {
+function isValidPrefixedKey(key: string | null | undefined, prefix: string): key is string {
   if (!key || typeof key !== "string") return false;
-  if (!key.startsWith("sop/") || key.length > 512) return false;
+  if (!key.startsWith(prefix) || key.length > 512) return false;
   if (key.includes("..") || key.includes("\\")) return false;
   for (let i = 0; i < key.length; i++) {
     const code = key.charCodeAt(i);
@@ -66,8 +67,7 @@ export function isValidSopObjectKey(key: string | null | undefined): key is stri
   return true;
 }
 
-/** Generates a collision-free, sanitized R2 key under `sop/`. */
-export function buildSopObjectKey(fileName: string): string {
+function buildPrefixedKey(prefix: string, fileName: string): string {
   const baseName = fileName
     .split(/[\\/]/)
     .pop()
@@ -79,14 +79,31 @@ export function buildSopObjectKey(fileName: string): string {
     typeof globalThis.crypto?.randomUUID === "function"
       ? globalThis.crypto.randomUUID()
       : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
-  return `sop/${Date.now()}-${unique}-${safeName}`;
+  return `${prefix}${Date.now()}-${unique}-${safeName}`;
 }
 
-/**
- * Uploads an original SOP file to R2 if `SOP_BUCKET` is bound.
- * Returns the stored `r2_key`, or `null` if R2 is not configured in this runtime.
- */
-export async function putSopFile(
+/** Validates that an R2 object key belongs to the `sop/` prefix and has no path traversal. */
+export function isValidSopObjectKey(key: string | null | undefined): key is string {
+  return isValidPrefixedKey(key, "sop/");
+}
+
+/** Validates that an R2 object key belongs to the `resources/` prefix and has no path traversal. */
+export function isValidResourceObjectKey(key: string | null | undefined): key is string {
+  return isValidPrefixedKey(key, "resources/");
+}
+
+/** Generates a collision-free, sanitized R2 key under `sop/`. */
+export function buildSopObjectKey(fileName: string): string {
+  return buildPrefixedKey("sop/", fileName);
+}
+
+/** Generates a collision-free, sanitized R2 key under `resources/<section>/`. */
+export function buildResourceObjectKey(section: EventSection, fileName: string): string {
+  return buildPrefixedKey(`resources/${section}/`, fileName);
+}
+
+async function putObject(
+  key: string,
   data: ArrayBuffer | Uint8Array,
   fileName: string,
   contentType?: string | null
@@ -94,7 +111,6 @@ export async function putSopFile(
   const bucket = await getSopBucket();
   if (!bucket) return null;
 
-  const key = buildSopObjectKey(fileName);
   const cleanType = (contentType || "application/octet-stream").split(";")[0].trim() || "application/octet-stream";
 
   await bucket.put(key, data, {
@@ -109,19 +125,43 @@ export async function putSopFile(
   return key;
 }
 
-export interface RetrievedSopFile {
+/**
+ * Uploads an original SOP file to R2 if `SOP_BUCKET` is bound.
+ * Returns the stored `r2_key`, or `null` if R2 is not configured in this runtime.
+ */
+export async function putSopFile(
+  data: ArrayBuffer | Uint8Array,
+  fileName: string,
+  contentType?: string | null
+): Promise<string | null> {
+  return putObject(buildSopObjectKey(fileName), data, fileName, contentType);
+}
+
+/**
+ * Uploads a Resource Bank session material file to R2 under `resources/<section>/`.
+ * Returns the stored `r2_key`, or `null` if R2 is not configured in this runtime.
+ */
+export async function putResourceFile(
+  section: EventSection,
+  data: ArrayBuffer | Uint8Array,
+  fileName: string,
+  contentType?: string | null
+): Promise<string | null> {
+  return putObject(buildResourceObjectKey(section, fileName), data, fileName, contentType);
+}
+
+export interface RetrievedR2File {
   body: R2ObjectBody["body"] | ArrayBuffer;
   contentType: string;
   size: number;
   etag?: string;
 }
 
-/**
- * Retrieves an SOP file from R2 by its key. Returns `null` if R2 is unavailable,
- * the key is invalid, or the object does not exist.
- */
-export async function getSopFile(key: string | null | undefined): Promise<RetrievedSopFile | null> {
-  if (!isValidSopObjectKey(key)) return null;
+/** Backward-compatible type alias. */
+export type RetrievedSopFile = RetrievedR2File;
+
+async function getObject(key: string | null | undefined, prefix: string): Promise<RetrievedR2File | null> {
+  if (!isValidPrefixedKey(key, prefix)) return null;
   const bucket = await getSopBucket();
   if (!bucket) return null;
 
@@ -137,17 +177,44 @@ export async function getSopFile(key: string | null | undefined): Promise<Retrie
 }
 
 /**
- * Best-effort deletion of an SOP file from R2. Never throws if R2 is unavailable
- * or the key does not exist so DB cleanup is never blocked.
+ * Retrieves an SOP file from R2 by its key. Returns `null` if R2 is unavailable,
+ * the key is invalid, or the object does not exist.
  */
-export async function deleteSopFile(key: string | null | undefined): Promise<void> {
-  if (!isValidSopObjectKey(key)) return;
+export async function getSopFile(key: string | null | undefined): Promise<RetrievedR2File | null> {
+  return getObject(key, "sop/");
+}
+
+/**
+ * Retrieves a Resource Bank file from R2 by its key. Returns `null` if R2 is unavailable,
+ * the key is invalid, or the object does not exist.
+ */
+export async function getResourceFile(key: string | null | undefined): Promise<RetrievedR2File | null> {
+  return getObject(key, "resources/");
+}
+
+async function deleteObject(key: string | null | undefined, prefix: string): Promise<void> {
+  if (!isValidPrefixedKey(key, prefix)) return;
   try {
     const bucket = await getSopBucket();
     if (!bucket) return;
     await bucket.delete(key);
   } catch (err) {
-    console.warn(`Notice: failed to delete R2 SOP object "${key}":`, err);
+    console.warn(`Notice: failed to delete R2 object "${key}":`, err);
   }
 }
 
+/**
+ * Best-effort deletion of an SOP file from R2. Never throws if R2 is unavailable
+ * or the key does not exist so DB cleanup is never blocked.
+ */
+export async function deleteSopFile(key: string | null | undefined): Promise<void> {
+  return deleteObject(key, "sop/");
+}
+
+/**
+ * Best-effort deletion of a Resource Bank file from R2. Never throws if R2 is unavailable
+ * or the key does not exist so DB cleanup is never blocked.
+ */
+export async function deleteResourceFile(key: string | null | undefined): Promise<void> {
+  return deleteObject(key, "resources/");
+}

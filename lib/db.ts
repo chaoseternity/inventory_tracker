@@ -1,5 +1,5 @@
 import { sql, ensureSchema, batch, stmt, rawStmt, query, type BoundStatement } from "./d1";
-import { deleteSopFile } from "./r2";
+import { deleteSopFile, deleteResourceFile } from "./r2";
 import { formatLongDateTime, parseDbDate, parseDueDate } from "./timezone";
 import type {
   Equipment,
@@ -18,6 +18,7 @@ import type {
   SectionDeploymentItem,
   EventMember,
   SOPDocument,
+  ResourceItem,
   DeploymentResponseStatus,
   NFCCard,
   NFCMemberData,
@@ -2594,6 +2595,185 @@ export async function searchSOPDocuments(rawQuery: string): Promise<SOPDocument[
     ORDER BY s.updated_at DESC
   `;
   return rows;
+}
+
+// ---------------------------------------------------------------------------
+// Section Resource Bank Helpers (Session Materials / Slides stored in R2)
+// ---------------------------------------------------------------------------
+
+export async function getAllResources(section?: EventSection): Promise<ResourceItem[]> {
+  await ensureSchema();
+  if (section) {
+    const { rows } = await sql<ResourceItem>`
+      SELECT
+        r.id,
+        r.title,
+        r.description,
+        r.section,
+        r.session_date,
+        r.file_name,
+        r.file_type,
+        r.file_size,
+        r.r2_key,
+        r.uploaded_by,
+        u.name AS uploaded_by_name,
+        r.created_at,
+        r.updated_at
+      FROM resources r
+      LEFT JOIN users u ON u.id = r.uploaded_by
+      WHERE r.section = ${section}
+      ORDER BY COALESCE(r.session_date, substr(r.created_at, 1, 10)) DESC, r.created_at DESC
+    `;
+    return rows;
+  }
+
+  const { rows } = await sql<ResourceItem>`
+    SELECT
+      r.id,
+      r.title,
+      r.description,
+      r.section,
+      r.session_date,
+      r.file_name,
+      r.file_type,
+      r.file_size,
+      r.r2_key,
+      r.uploaded_by,
+      u.name AS uploaded_by_name,
+      r.created_at,
+      r.updated_at
+    FROM resources r
+    LEFT JOIN users u ON u.id = r.uploaded_by
+    ORDER BY COALESCE(r.session_date, substr(r.created_at, 1, 10)) DESC, r.created_at DESC
+  `;
+  return rows;
+}
+
+export async function getResourceById(id: number): Promise<ResourceItem | undefined> {
+  if (!Number.isInteger(id) || id <= 0) return undefined;
+  await ensureSchema();
+  const { rows } = await sql<ResourceItem>`
+    SELECT
+      r.id,
+      r.title,
+      r.description,
+      r.section,
+      r.session_date,
+      r.file_name,
+      r.file_type,
+      r.file_size,
+      r.r2_key,
+      r.uploaded_by,
+      u.name AS uploaded_by_name,
+      r.created_at,
+      r.updated_at
+    FROM resources r
+    LEFT JOIN users u ON u.id = r.uploaded_by
+    WHERE r.id = ${id}
+  `;
+  return rows[0];
+}
+
+export async function createResource(params: {
+  title: string;
+  description?: string | null;
+  section: EventSection;
+  session_date?: string | null;
+  file_name: string;
+  file_type: string;
+  file_size: number;
+  r2_key: string;
+  uploaded_by?: number | null;
+}): Promise<ResourceItem> {
+  await ensureSchema();
+
+  let validUserId: number | null = null;
+  if (params.uploaded_by) {
+    try {
+      const userExists = await getUserById(params.uploaded_by);
+      if (userExists) validUserId = params.uploaded_by;
+    } catch {
+      validUserId = null;
+    }
+  }
+
+  const { rows } = await sql<{ id: number }>`
+    INSERT INTO resources (
+      title,
+      description,
+      section,
+      session_date,
+      file_name,
+      file_type,
+      file_size,
+      r2_key,
+      uploaded_by
+    )
+    VALUES (
+      ${params.title},
+      ${params.description ?? null},
+      ${params.section},
+      ${params.session_date ?? null},
+      ${params.file_name},
+      ${params.file_type},
+      ${params.file_size},
+      ${params.r2_key},
+      ${validUserId}
+    )
+    RETURNING id
+  `;
+  const created = await getResourceById(rows[0].id);
+  return created!;
+}
+
+export async function updateResource(
+  id: number,
+  params: {
+    title?: string;
+    description?: string | null;
+    section?: EventSection;
+    session_date?: string | null;
+  }
+): Promise<ResourceItem | undefined> {
+  await ensureSchema();
+  const existing = await getResourceById(id);
+  if (!existing) return undefined;
+
+  const title = params.title ?? existing.title;
+  const description = params.description !== undefined ? params.description : existing.description;
+  const section = params.section ?? existing.section;
+  const session_date = params.session_date !== undefined ? params.session_date : existing.session_date;
+
+  await sql`
+    UPDATE resources
+    SET
+      title = ${title},
+      description = ${description},
+      section = ${section},
+      session_date = ${session_date},
+      updated_at = CURRENT_TIMESTAMP
+    WHERE id = ${id}
+  `;
+  return getResourceById(id);
+}
+
+export async function deleteResource(id: number): Promise<{ success: boolean; error?: string }> {
+  await ensureSchema();
+  if (!Number.isInteger(id) || id <= 0) {
+    return { success: false, error: "Invalid resource ID." };
+  }
+  const existing = await getResourceById(id);
+  if (!existing) {
+    return { success: false, error: "Resource not found." };
+  }
+  const { rowCount } = await sql`DELETE FROM resources WHERE id = ${id}`;
+  if (!rowCount || rowCount === 0) {
+    return { success: false, error: "Resource not found." };
+  }
+  if (existing.r2_key) {
+    await deleteResourceFile(existing.r2_key);
+  }
+  return { success: true };
 }
 
 // ---------------------------------------------------------------------------

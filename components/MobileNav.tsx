@@ -24,6 +24,7 @@ import {
   CalendarClock,
   Boxes,
   ClipboardCheck,
+  FolderArchive,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -60,9 +61,10 @@ const navGroups: NavGroup[] = [
     ],
   },
   {
-    title: "SOP & AI Assistant",
+    title: "SOP & Resources",
     items: [
       { href: "/dashboard/sop", label: "SOP & AI", icon: Bot, roles: ["admin", "verified", "viewer"] },
+      { href: "/dashboard/resources", label: "Resource Bank", icon: FolderArchive, roles: ["admin", "verified", "viewer"] },
     ],
   },
   {

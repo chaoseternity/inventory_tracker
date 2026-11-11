@@ -92,6 +92,7 @@ export const REQUIRED_TABLES = [
   "event_deployments",
   "event_section_rehearsals",
   "sop_documents",
+  "resources",
   "checkout_reminders",
   "reservations",
   "handover_codes",
