@@ -130,6 +130,7 @@ export const SCHEMA_SQL = `
     file_name    TEXT,
     file_type    TEXT,
     file_size    INTEGER,
+    r2_key       TEXT,
     uploaded_by  INTEGER REFERENCES users(id) ON DELETE SET NULL,
     created_at   TEXT    NOT NULL DEFAULT (datetime('now')),
     updated_at   TEXT    NOT NULL DEFAULT (datetime('now'))

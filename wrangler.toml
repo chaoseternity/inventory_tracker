@@ -9,6 +9,10 @@ database_name = "inventory-tracker-db"
 database_id = "f89218c0-ab4f-400d-ab60-bc04496af1fd"
 migrations_dir = "migrations"
 
+[[r2_buckets]]
+binding = "SOP_BUCKET"
+bucket_name = "inventory-tracker-sops"
+
 [vars]
 AUTH_URL = "https://nushmedia.app"
 # ADMIN_EMAILS is a secret: `npx wrangler secret put ADMIN_EMAILS` (comma-separated emails)

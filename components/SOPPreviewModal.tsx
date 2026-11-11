@@ -7,9 +7,9 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { BookOpen, FileText, Calendar, User } from "lucide-react";
+import { BookOpen, FileText, Calendar, User, Download, ExternalLink } from "lucide-react";
 import type { SOPDocument, SOPCitation } from "@/lib/types";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
@@ -152,7 +152,41 @@ export function SOPPreviewModal({
           {renderContent()}
         </div>
 
-        <DialogFooter className="border-t pt-3">
+        <DialogFooter className="border-t pt-3 flex flex-wrap gap-2 sm:justify-between">
+          {document.r2_key ? (
+            <div className="flex flex-wrap items-center gap-2">
+              {(document.file_type === "application/pdf" ||
+                document.file_name?.toLowerCase().endsWith(".pdf")) && (
+                <a
+                  href={`/api/sop/${document.id}/file`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className={buttonVariants({
+                    variant: "outline",
+                    size: "sm",
+                    className: "gap-1.5 text-xs",
+                  })}
+                >
+                  <ExternalLink className="h-3.5 w-3.5" />
+                  View Original PDF
+                </a>
+              )}
+              <a
+                href={`/api/sop/${document.id}/file?download=1`}
+                download
+                className={buttonVariants({
+                  variant: "secondary",
+                  size: "sm",
+                  className: "gap-1.5 text-xs",
+                })}
+              >
+                <Download className="h-3.5 w-3.5" />
+                Download Original
+              </a>
+            </div>
+          ) : (
+            <div />
+          )}
           <Button type="button" variant="outline" onClick={onClose}>
             Close
           </Button>

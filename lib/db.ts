@@ -1,4 +1,5 @@
 import { sql, ensureSchema, batch, stmt, rawStmt, query, type BoundStatement } from "./d1";
+import { deleteSopFile } from "./r2";
 import { formatLongDateTime, parseDbDate, parseDueDate } from "./timezone";
 import type {
   Equipment,
@@ -2410,6 +2411,7 @@ export async function getAllSOPDocuments(): Promise<SOPDocument[]> {
       s.file_name,
       s.file_type,
       s.file_size,
+      s.r2_key,
       s.uploaded_by,
       u.name AS uploaded_by_name,
       s.created_at,
@@ -2433,6 +2435,7 @@ export async function getSOPDocumentById(id: number): Promise<SOPDocument | unde
       s.file_name,
       s.file_type,
       s.file_size,
+      s.r2_key,
       s.uploaded_by,
       u.name AS uploaded_by_name,
       s.created_at,
@@ -2451,6 +2454,7 @@ export async function createSOPDocument(params: {
   file_name?: string | null;
   file_type?: string | null;
   file_size?: number | null;
+  r2_key?: string | null;
   uploaded_by?: number | null;
 }): Promise<SOPDocument> {
   await ensureSOPTable();
@@ -2474,6 +2478,7 @@ export async function createSOPDocument(params: {
       file_name,
       file_type,
       file_size,
+      r2_key,
       uploaded_by
     )
     VALUES (
@@ -2483,6 +2488,7 @@ export async function createSOPDocument(params: {
       ${params.file_name ?? null},
       ${params.file_type ?? null},
       ${params.file_size ?? null},
+      ${params.r2_key ?? null},
       ${validUserId}
     )
     RETURNING *
@@ -2499,6 +2505,7 @@ export async function updateSOPDocument(
     file_name?: string | null;
     file_type?: string | null;
     file_size?: number | null;
+    r2_key?: string | null;
   }
 ): Promise<SOPDocument | undefined> {
   await ensureSOPTable();
@@ -2511,6 +2518,7 @@ export async function updateSOPDocument(
   const file_name = params.file_name !== undefined ? params.file_name : existing.file_name;
   const file_type = params.file_type !== undefined ? params.file_type : existing.file_type;
   const file_size = params.file_size !== undefined ? params.file_size : existing.file_size;
+  const r2_key = params.r2_key !== undefined ? params.r2_key : (existing.r2_key ?? null);
 
   const { rows } = await sql<SOPDocument>`
     UPDATE sop_documents
@@ -2521,10 +2529,18 @@ export async function updateSOPDocument(
       file_name = ${file_name},
       file_type = ${file_type},
       file_size = ${file_size},
+      r2_key = ${r2_key},
       updated_at = CURRENT_TIMESTAMP
     WHERE id = ${id}
     RETURNING *
   `;
+  if (
+    params.r2_key !== undefined &&
+    existing.r2_key &&
+    existing.r2_key !== params.r2_key
+  ) {
+    await deleteSopFile(existing.r2_key);
+  }
   return rows[0];
 }
 
@@ -2533,9 +2549,16 @@ export async function deleteSOPDocument(id: number): Promise<{ success: boolean;
   if (!Number.isInteger(id) || id <= 0) {
     return { success: false, error: "Invalid document ID." };
   }
+  const existing = await getSOPDocumentById(id);
+  if (!existing) {
+    return { success: false, error: "SOP Document not found." };
+  }
   const { rowCount } = await sql`DELETE FROM sop_documents WHERE id = ${id}`;
   if (!rowCount || rowCount === 0) {
     return { success: false, error: "SOP Document not found." };
+  }
+  if (existing.r2_key) {
+    await deleteSopFile(existing.r2_key);
   }
   return { success: true };
 }
@@ -2558,6 +2581,7 @@ export async function searchSOPDocuments(rawQuery: string): Promise<SOPDocument[
       s.file_name,
       s.file_type,
       s.file_size,
+      s.r2_key,
       s.uploaded_by,
       u.name AS uploaded_by_name,
       s.created_at,

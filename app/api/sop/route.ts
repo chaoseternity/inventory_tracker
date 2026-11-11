@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
-import { getAllSOPDocuments, createSOPDocument, updateSOPDocument, getUserByEmail } from "@/lib/db";
+import { getAllSOPDocuments, getSOPDocumentById, createSOPDocument, updateSOPDocument, getUserByEmail } from "@/lib/db";
 import { extractTextFromDocument } from "@/lib/doc-parser";
+import { putSopFile, deleteSopFile } from "@/lib/r2";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { declaredContentLength, isUploadedFile, zodErrorMessage } from "@/lib/api-errors";
@@ -222,18 +223,19 @@ export async function POST(req: NextRequest) {
         }
       }
 
-      const fileName = (file?.name || "document.txt").slice(0, 255);
+      const rawFileName = (file?.name || "document.txt").split(/[\\/]/).pop() || "document.txt";
+      const fileName = rawFileName.slice(0, 255);
       const fileType = (file?.type || "application/octet-stream").slice(0, 100);
       const fileSize = file?.size || null;
       const title = (customTitle?.trim() || fileName.replace(/\.[^/.]+$/, "").replace(/[-_]/g, " ")).slice(0, 200);
 
       let content = clientExtractedContent?.trim() || "";
+      const fileBytes = file ? new Uint8Array(await file.arrayBuffer()) : null;
 
       // If content was not extracted client-side, extract on the server
-      if (!content && file) {
+      if (!content && fileBytes) {
         try {
-          const buffer = Buffer.from(await file.arrayBuffer());
-          content = await extractTextFromDocument(buffer, fileName, fileType);
+          content = await extractTextFromDocument(fileBytes, fileName, fileType);
         } catch (err: unknown) {
           return NextResponse.json({ error: extractionErrorMessage(err) }, { status: 422 });
         }
@@ -246,51 +248,69 @@ export async function POST(req: NextRequest) {
         );
       }
 
+      // Verify overwrite target or duplicate conflict before uploading binary to R2.
       if (overwriteId) {
-        const updated = await updateSOPDocument(overwriteId, {
+        const existing = await getSOPDocumentById(overwriteId);
+        if (!existing) {
+          return NextResponse.json({ error: "Document to overwrite was not found" }, { status: 404 });
+        }
+      } else {
+        const existingDocs = await getAllSOPDocuments();
+        const duplicate = existingDocs.find(
+          (d) =>
+            d.title.trim().toLowerCase() === title.toLowerCase() ||
+            (d.file_name && d.file_name.toLowerCase() === fileName.toLowerCase())
+        );
+
+        if (duplicate) {
+          return NextResponse.json(
+            {
+              error: `A document named "${duplicate.title}" already exists in the SOP database.`,
+              existing_id: duplicate.id,
+              existing_title: duplicate.title,
+            },
+            { status: 409 }
+          );
+        }
+      }
+
+      // Store original binary in R2 (if bound) and roll back if the DB write fails.
+      const r2Key = fileBytes ? await putSopFile(fileBytes, fileName, fileType) : null;
+
+      try {
+        if (overwriteId) {
+          const updated = await updateSOPDocument(overwriteId, {
+            title,
+            category,
+            content,
+            file_name: fileName,
+            file_type: fileType,
+            file_size: fileSize,
+            r2_key: r2Key,
+          });
+          if (!updated) {
+            if (r2Key) await deleteSopFile(r2Key);
+            return NextResponse.json({ error: "Document to overwrite was not found" }, { status: 404 });
+          }
+          return NextResponse.json(updated, { status: 200 });
+        }
+
+        const doc = await createSOPDocument({
           title,
           category,
           content,
           file_name: fileName,
           file_type: fileType,
           file_size: fileSize,
+          r2_key: r2Key,
+          uploaded_by: uploadedBy,
         });
-        if (!updated) {
-          return NextResponse.json({ error: "Document to overwrite was not found" }, { status: 404 });
-        }
-        return NextResponse.json(updated, { status: 200 });
+
+        return NextResponse.json(doc, { status: 201 });
+      } catch (dbErr) {
+        if (r2Key) await deleteSopFile(r2Key);
+        throw dbErr;
       }
-
-      // Check for duplicate in DB
-      const existingDocs = await getAllSOPDocuments();
-      const duplicate = existingDocs.find(
-        (d) =>
-          d.title.trim().toLowerCase() === title.toLowerCase() ||
-          (d.file_name && d.file_name.toLowerCase() === fileName.toLowerCase())
-      );
-
-      if (duplicate) {
-        return NextResponse.json(
-          {
-            error: `A document named "${duplicate.title}" already exists in the SOP database.`,
-            existing_id: duplicate.id,
-            existing_title: duplicate.title,
-          },
-          { status: 409 }
-        );
-      }
-
-      const doc = await createSOPDocument({
-        title,
-        category,
-        content,
-        file_name: fileName,
-        file_type: fileType,
-        file_size: fileSize,
-        uploaded_by: uploadedBy,
-      });
-
-      return NextResponse.json(doc, { status: 201 });
     }
 
     return NextResponse.json({ error: "Unsupported Content-Type header." }, { status: 400 });

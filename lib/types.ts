@@ -185,6 +185,7 @@ export interface SOPDocument {
   file_name: string | null;
   file_type: string | null;
   file_size: number | null;
+  r2_key?: string | null;
   uploaded_by: number | null;
   uploaded_by_name?: string | null;
   created_at: string;

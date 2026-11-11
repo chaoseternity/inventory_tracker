@@ -33,8 +33,9 @@ import {
   MicOff,
   Volume2,
   VolumeX,
+  Download,
 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -520,37 +521,23 @@ export function SOPManager({ initialDocuments, role, userName }: SOPManagerProps
       });
 
       try {
-        let res: Response;
+        // Always upload via FormData so the original binary file can be archived in R2;
+        // include pre-extracted text when available so the server skips redundant parsing.
+        const formData = new FormData();
+        formData.append("file", item.file);
+        formData.append("title", item.title.trim());
+        formData.append("category", item.category);
         if (item.content && !item.content.startsWith("[File selected:")) {
-          // Send JSON payload
-          res = await fetch("/api/sop", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              title: item.title.trim(),
-              category: item.category,
-              content: item.content.trim(),
-              file_name: item.file.name,
-              file_type: item.file.type || null,
-              file_size: item.file.size,
-              overwrite_id: item.overwriteDocId || null,
-            }),
-          });
-        } else {
-          // Send FormData
-          const formData = new FormData();
-          formData.append("file", item.file);
-          formData.append("title", item.title.trim());
-          formData.append("category", item.category);
-          if (item.overwriteDocId) {
-            formData.append("overwrite_id", String(item.overwriteDocId));
-          }
-
-          res = await fetch("/api/sop", {
-            method: "POST",
-            body: formData,
-          });
+          formData.append("content", item.content.trim());
         }
+        if (item.overwriteDocId) {
+          formData.append("overwrite_id", String(item.overwriteDocId));
+        }
+
+        const res = await fetch("/api/sop", {
+          method: "POST",
+          body: formData,
+        });
 
         if (!res.ok) {
           const errData = await res.json().catch(() => ({}));
@@ -1575,19 +1562,36 @@ export function SOPManager({ initialDocuments, role, userName }: SOPManagerProps
                       )}
                     </div>
 
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setPreviewDoc(doc);
-                        setPreviewCitation(null);
-                        setPreviewOpen(true);
-                      }}
-                      className="w-full text-xs h-7 gap-1"
-                    >
-                      <BookOpen className="h-3 w-3" />
-                      Read Full SOP
-                    </Button>
+                    <div className="flex items-center gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setPreviewDoc(doc);
+                          setPreviewCitation(null);
+                          setPreviewOpen(true);
+                        }}
+                        className="flex-1 text-xs h-7 gap-1"
+                      >
+                        <BookOpen className="h-3 w-3" />
+                        Read Full SOP
+                      </Button>
+                      {doc.r2_key && (
+                        <a
+                          href={`/api/sop/${doc.id}/file?download=1`}
+                          download
+                          className={buttonVariants({
+                            variant: "outline",
+                            size: "sm",
+                            className: "text-xs h-7 px-2.5 gap-1 shrink-0",
+                          })}
+                          title={`Download original file (${doc.file_name || doc.title})`}
+                        >
+                          <Download className="h-3 w-3" />
+                          <span className="sr-only sm:not-sr-only">Original</span>
+                        </a>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}

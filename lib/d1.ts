@@ -139,13 +139,24 @@ async function probeD1Schema(d1: D1Database): Promise<void> {
  * SCHEMA_SQL indexes depend on, so the bootstrap below doesn't fail half-way.
  */
 function upgradeLocalSchema(db: any): void {
-  const hasTable = db
+  const hasReminders = db
     .prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'checkout_reminders'")
     .get();
-  if (!hasTable) return;
-  const cols = db.prepare("PRAGMA table_info(checkout_reminders)").all() as { name: string }[];
-  if (!cols.some((c) => c.name === "window_key")) {
-    db.exec("ALTER TABLE checkout_reminders ADD COLUMN window_key TEXT");
+  if (hasReminders) {
+    const cols = db.prepare("PRAGMA table_info(checkout_reminders)").all() as { name: string }[];
+    if (!cols.some((c) => c.name === "window_key")) {
+      db.exec("ALTER TABLE checkout_reminders ADD COLUMN window_key TEXT");
+    }
+  }
+
+  const hasSops = db
+    .prepare("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'sop_documents'")
+    .get();
+  if (hasSops) {
+    const cols = db.prepare("PRAGMA table_info(sop_documents)").all() as { name: string }[];
+    if (!cols.some((c) => c.name === "r2_key")) {
+      db.exec("ALTER TABLE sop_documents ADD COLUMN r2_key TEXT");
+    }
   }
 }
 
