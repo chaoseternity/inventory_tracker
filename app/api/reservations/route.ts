@@ -4,7 +4,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import type { ReservationStatus } from "@/lib/types";
 import { errorResponse, readJsonBody, toErrorResponse, zodErrorMessage } from "@/lib/api-errors";
-import { isAdminRole } from "@/lib/utils";
 
 const RESERVATION_STATUSES = ["confirmed", "cancelled", "fulfilled"] as const satisfies readonly ReservationStatus[];
 
@@ -63,8 +62,8 @@ export async function GET(req: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!isAdminRole(session.user.role)) {
-    return NextResponse.json({ error: "Forbidden: Reservations are admin-only." }, { status: 403 });
+  if (session.user.role !== "developer") {
+    return NextResponse.json({ error: "Forbidden: Reservations are developer-only." }, { status: 403 });
   }
 
   const { searchParams } = new URL(req.url);
@@ -96,8 +95,8 @@ export async function POST(req: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!isAdminRole(session.user.role)) {
-    return NextResponse.json({ error: "Forbidden: Reservations are admin-only." }, { status: 403 });
+  if (session.user.role !== "developer") {
+    return NextResponse.json({ error: "Forbidden: Reservations are developer-only." }, { status: 403 });
   }
 
   const body = await readJsonBody(req);

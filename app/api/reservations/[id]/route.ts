@@ -3,7 +3,6 @@ import { getReservationById, cancelReservation, fulfillReservation } from "@/lib
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { readJsonBody, resultErrorResponse, toErrorResponse, zodErrorMessage, errorResponse } from "@/lib/api-errors";
-import { isAdminRole } from "@/lib/utils";
 
 const PatchReservationSchema = z.object({
   action: z.enum(["fulfill"], { error: "Unsupported action." }).optional(),
@@ -17,8 +16,8 @@ export async function GET(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!isAdminRole(session.user.role)) {
-    return NextResponse.json({ error: "Forbidden: Reservations are admin-only." }, { status: 403 });
+  if (session.user.role !== "developer") {
+    return NextResponse.json({ error: "Forbidden: Reservations are developer-only." }, { status: 403 });
   }
 
   const { id } = await params;
@@ -46,8 +45,8 @@ export async function DELETE(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!isAdminRole(session.user.role)) {
-    return NextResponse.json({ error: "Forbidden: Reservations are admin-only." }, { status: 403 });
+  if (session.user.role !== "developer") {
+    return NextResponse.json({ error: "Forbidden: Reservations are developer-only." }, { status: 403 });
   }
 
   const { id } = await params;
@@ -57,7 +56,7 @@ export async function DELETE(
   }
 
   const userId = Number(session.user.id);
-  const isAdmin = isAdminRole(session.user.role);
+  const isAdmin = session.user.role === "developer";
 
   try {
     const result = await cancelReservation(resId, userId, isAdmin);
@@ -79,8 +78,8 @@ export async function PATCH(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (!isAdminRole(session.user.role)) {
-    return NextResponse.json({ error: "Forbidden: Reservations are admin-only." }, { status: 403 });
+  if (session.user.role !== "developer") {
+    return NextResponse.json({ error: "Forbidden: Reservations are developer-only." }, { status: 403 });
   }
 
   const { id } = await params;

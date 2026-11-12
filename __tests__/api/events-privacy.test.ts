@@ -50,7 +50,7 @@ describe("Event data privacy & RSVP tokens", () => {
     });
     const { token } = await addDeploymentToEventSection(event.id, member.id, "photo", false, admin.id);
     (auth as jest.Mock).mockResolvedValue({
-      user: { id: String(member.id), email: member.email, name: member.name, role: "viewer" },
+      user: { id: String(admin.id), email: admin.email, name: admin.name, role: "developer" },
     });
     return { admin, member, event, token };
   }

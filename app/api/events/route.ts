@@ -3,7 +3,6 @@ import { getAllEvents, createEvent, getUserByEmail } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { toErrorResponse, validationErrorResponse } from "@/lib/api-errors";
-import { isAdminRole } from "@/lib/utils";
 
 const CreateEventSchema = z
   .object({
@@ -61,6 +60,9 @@ const CreateEventSchema = z
 export async function GET() {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (session.user.role !== "developer") {
+    return NextResponse.json({ error: "Forbidden: Events are developer-only." }, { status: 403 });
+  }
 
   try {
     const events = await getAllEvents();
@@ -74,8 +76,8 @@ export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  if (!isAdminRole(session.user.role)) {
-    return NextResponse.json({ error: "Only admins can create events" }, { status: 403 });
+  if (session.user.role !== "developer") {
+    return NextResponse.json({ error: "Forbidden: Events are developer-only." }, { status: 403 });
   }
 
   let body: unknown;

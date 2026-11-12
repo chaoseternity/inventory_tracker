@@ -1,13 +1,12 @@
 import { auth } from "@/lib/auth";
 import { getAllEquipment, getReservations, getUserByEmail } from "@/lib/db";
 import { redirect } from "next/navigation";
-import { isAdminRole } from "@/lib/utils";
 import { ReservationsClient } from "./ReservationsClient";
 
 export default async function ReservationsPage() {
   const session = await auth();
   if (!session) redirect("/login");
-  if (!isAdminRole(session.user.role)) redirect("/dashboard");
+  if (session.user.role !== "developer") redirect("/dashboard");
 
   const [equipmentList, reservations, currentUser] = await Promise.all([
     getAllEquipment(),

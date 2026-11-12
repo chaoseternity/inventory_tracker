@@ -96,7 +96,7 @@ describe("Gear Reservations & Conflict Detection", () => {
     });
 
     (auth as jest.Mock).mockResolvedValue({
-      user: { id: String(user.id), email: user.email, name: user.name, role: "admin" },
+      user: { id: String(user.id), email: user.email, name: user.name, role: "developer" },
     });
 
     const eq = await createEquipment({
@@ -166,7 +166,7 @@ describe("Gear Reservations & Conflict Detection", () => {
       return { admin, eq, reservation };
     }
 
-    test.each(["verified", "viewer"] as const)("every reservations route returns 403 for %s users", async (role) => {
+    test.each(["admin", "verified", "viewer"] as const)("every reservations route returns 403 for %s users", async (role) => {
       const { eq, reservation } = await seedReservation();
       const member = await upsertUser({
         name: `Member ${role}`,
@@ -220,10 +220,10 @@ describe("Gear Reservations & Conflict Detection", () => {
       expect(await getReservations()).toHaveLength(1);
     });
 
-    test("admins can list and view reservations", async () => {
+    test("developers can list and view reservations", async () => {
       const { admin, reservation } = await seedReservation();
       (auth as jest.Mock).mockResolvedValue({
-        user: { id: String(admin.id), email: admin.email, name: admin.name, role: "admin" },
+        user: { id: String(admin.id), email: admin.email, name: admin.name, role: "developer" },
       });
       const list = await listReservationsRoute(new NextRequest("http://localhost/api/reservations"));
       expect(list.status).toBe(200);

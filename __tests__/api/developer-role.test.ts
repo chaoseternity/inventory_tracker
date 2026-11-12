@@ -14,7 +14,9 @@ import { POST as createEquipmentRoute } from "@/app/api/equipment/route";
 import { GET as listUsersRoute } from "@/app/api/users/route";
 import { PUT as updateUserRoute } from "@/app/api/users/[id]/route";
 import { POST as createTagRoute } from "@/app/api/tags/route";
-import { POST as createEventRoute } from "@/app/api/events/route";
+import { POST as createEventRoute, GET as listEventsRoute } from "@/app/api/events/route";
+import { GET as listReservationsRoute } from "@/app/api/reservations/route";
+import { GET as getStorageMapRoute } from "@/app/api/storage-map/route";
 import { POST as auditSessionPost } from "@/app/api/audit/session/route";
 import { NextRequest } from "next/server";
 
@@ -142,6 +144,24 @@ describe("developer role parity with admin", () => {
     // 5. Start audit session
     const auditRes = await auditSessionPost(jsonReq("/api/audit/session", "POST", { name: "Dev Audit" }));
     expect(auditRes.status).toBe(201);
+  });
+
+  test("reservations, events, and storage-map are restricted exclusively to developer role", async () => {
+    for (const role of ["admin", "verified", "viewer"] as const) {
+      (auth as jest.Mock).mockResolvedValue({
+        user: { id: "99", email: `${role}@school.edu`, name: role, role },
+      });
+      expect((await listReservationsRoute(new NextRequest("http://localhost/api/reservations"))).status).toBe(403);
+      expect((await listEventsRoute()).status).toBe(403);
+      expect((await getStorageMapRoute()).status).toBe(403);
+    }
+
+    (auth as jest.Mock).mockResolvedValue({
+      user: { id: "1", email: "dev@school.edu", name: "Dev", role: "developer" },
+    });
+    expect((await listReservationsRoute(new NextRequest("http://localhost/api/reservations"))).status).toBe(200);
+    expect((await listEventsRoute()).status).toBe(200);
+    expect((await getStorageMapRoute()).status).toBe(200);
   });
 });
 

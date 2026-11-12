@@ -60,6 +60,12 @@ async function asAdmin() {
   return admin;
 }
 
+async function asDeveloper() {
+  const dev = await makeUser("Dev Dan", "developer");
+  asUser(dev, "developer");
+  return dev;
+}
+
 function jsonReq(url: string, method: string, body: unknown, raw = false) {
   return new NextRequest(`http://localhost${url}`, {
     method,
@@ -123,7 +129,7 @@ describe("API error handling & validation", () => {
 
   describe("no internal error leakage", () => {
     test("reservation POST masks an unexpected DB error", async () => {
-      await asAdmin();
+      await asDeveloper();
       const eq = await makeItem();
       jest.spyOn(db, "createReservation").mockRejectedValue(new Error(INTERNAL));
       const res = await createReservationRoute(
@@ -147,7 +153,7 @@ describe("API error handling & validation", () => {
     });
 
     test("storage map GET returns a generic 500 instead of crashing", async () => {
-      await asAdmin();
+      await asDeveloper();
       jest.spyOn(db, "getStorageMapData").mockRejectedValue(new Error(INTERNAL));
       const res = await storageMapGet();
       expect(res.status).toBe(500);
@@ -179,7 +185,7 @@ describe("API error handling & validation", () => {
 
   describe("reservations", () => {
     test("malformed JSON, null body and bad fields → 400 (not 409)", async () => {
-      await asAdmin();
+      await asDeveloper();
       const eq = await makeItem();
       const start = new Date(Date.now() + HOUR).toISOString();
       const end = new Date(Date.now() + 2 * HOUR).toISOString();
@@ -202,7 +208,7 @@ describe("API error handling & validation", () => {
     });
 
     test("accepts the legacy start_date/end_date aliases", async () => {
-      await asAdmin();
+      await asDeveloper();
       const eq = await makeItem();
       const res = await createReservationRoute(
         jsonReq("/api/reservations", "POST", {
@@ -216,13 +222,13 @@ describe("API error handling & validation", () => {
     });
 
     test("invalid status filter → 400", async () => {
-      await asAdmin();
+      await asDeveloper();
       const res = await listReservationsRoute(new NextRequest("http://localhost/api/reservations?status=bogus"));
       expect(res.status).toBe(400);
     });
 
     test("cancel: unknown → 404, forbidden → 403, already cancelled → 4xx", async () => {
-      const admin = await asAdmin();
+      const admin = await asDeveloper();
       const eq = await makeItem();
       const r = await createReservation({
         equipment_id: eq.id,
@@ -249,7 +255,7 @@ describe("API error handling & validation", () => {
     });
 
     test("PATCH rejects malformed JSON and unknown actions", async () => {
-      await asAdmin();
+      await asDeveloper();
       const params = { params: Promise.resolve({ id: "1" }) };
       expect((await patchReservationRoute(jsonReq("/api/reservations/1", "PATCH", "{", true), params)).status).toBe(400);
       expect(
@@ -270,14 +276,14 @@ describe("API error handling & validation", () => {
       [{ action: "move_item", equipment_id: 1, cabinet: { a: 1 }, shelf: "A" }],
       [{ action: "unknown" }],
     ])("rejects invalid payload %# with 400", async (payload) => {
-      await asAdmin();
+      await asDeveloper();
       const res = await storageMapPost(jsonReq("/api/storage-map", "POST", payload));
       expect(res.status).toBe(400);
       expect(typeof (await res.json()).error).toBe("string");
     });
 
     test("rejects malformed JSON with 400", async () => {
-      await asAdmin();
+      await asDeveloper();
       const res = await storageMapPost(jsonReq("/api/storage-map", "POST", "{bad", true));
       expect(res.status).toBe(400);
     });
@@ -285,7 +291,7 @@ describe("API error handling & validation", () => {
 
   describe("events PUT validates merged times", () => {
     async function seedEvent(withRehearsal = false) {
-      const admin = await asAdmin();
+      const admin = await asDeveloper();
       const start = Date.now() + 10 * HOUR;
       const event = await createEvent({
         name: "Gala",
@@ -651,7 +657,7 @@ describe("API error handling & validation", () => {
 
   describe("event section invitation emails", () => {
     async function seed() {
-      const admin = await asAdmin();
+      const admin = await asDeveloper();
       const member = await makeUser("Mia Member", "verified");
       const event = await createEvent({
         name: "Concert",

@@ -6,6 +6,7 @@ import { StorageMapClient } from "./StorageMapClient";
 export default async function StorageMapPage() {
   const session = await auth();
   if (!session) redirect("/login");
+  if (session.user.role !== "developer") redirect("/dashboard");
 
   const [data, config] = await Promise.all([
     getStorageMapData(),

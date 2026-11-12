@@ -18,9 +18,9 @@ describe("Storage Map API & Drag-and-Drop", () => {
     setTestDb(null);
   });
 
-  it("allows admin to move equipment to a custom cabinet and shelf", async () => {
+  it("allows developer to move equipment to a custom cabinet and shelf", async () => {
     (auth as jest.Mock).mockResolvedValue({
-      user: { id: "1", name: "Admin", email: "admin@club.com", role: "admin" },
+      user: { id: "1", name: "Developer", email: "dev@club.com", role: "developer" },
     });
 
     const eq = await createEquipment({
@@ -56,31 +56,33 @@ describe("Storage Map API & Drag-and-Drop", () => {
     expect(shelfB?.items.some((i) => i.id === eq.id)).toBe(true);
   });
 
-  it("denies non-admin users from moving equipment or saving layout", async () => {
-    (auth as jest.Mock).mockResolvedValue({
-      user: { id: "2", name: "Viewer", email: "viewer@club.com", role: "viewer" },
-    });
+  it("denies non-developer users (including admin) from moving equipment or saving layout", async () => {
+    for (const role of ["admin", "verified", "viewer"] as const) {
+      (auth as jest.Mock).mockResolvedValue({
+        user: { id: "2", name: "User", email: "user@club.com", role },
+      });
 
-    const req = new Request("http://localhost:3000/api/storage-map", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        action: "move_item",
-        equipment_id: 1,
-        cabinet: "Cabinet 1",
-        shelf: "Shelf A",
-      }),
-    });
+      const req = new Request("http://localhost:3000/api/storage-map", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "move_item",
+          equipment_id: 1,
+          cabinet: "Cabinet 1",
+          shelf: "Shelf A",
+        }),
+      });
 
-    const res = await POST(req);
-    expect(res.status).toBe(403);
-    const data = await res.json();
-    expect(data.error).toMatch(/Only administrators/);
+      const res = await POST(req);
+      expect(res.status).toBe(403);
+      const data = await res.json();
+      expect(data.error).toMatch(/developer-only/i);
+    }
   });
 
   it("saves and retrieves custom cabinet layout", async () => {
     (auth as jest.Mock).mockResolvedValue({
-      user: { id: "1", name: "Admin", email: "admin@club.com", role: "admin" },
+      user: { id: "1", name: "Developer", email: "dev@club.com", role: "developer" },
     });
 
     const customConfig = [

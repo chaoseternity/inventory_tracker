@@ -30,6 +30,9 @@ export async function POST(
 ) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (session.user.role !== "developer") {
+    return NextResponse.json({ error: "Forbidden: Events are developer-only." }, { status: 403 });
+  }
 
   const { id } = await params;
   const eventId = Number(id);
@@ -90,6 +93,9 @@ export async function DELETE(
 ) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (session.user.role !== "developer") {
+    return NextResponse.json({ error: "Forbidden: Events are developer-only." }, { status: 403 });
+  }
 
   const { id } = await params;
   const eventId = Number(id);

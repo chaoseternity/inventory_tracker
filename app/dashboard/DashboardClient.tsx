@@ -4,7 +4,7 @@ import { useState } from "react";
 import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Plus, Package, Download, Upload, Bell, Loader2, Radio } from "lucide-react";
+import { Plus, Package, Download, Upload, Bell, Loader2 } from "lucide-react";
 import { AddEquipmentModal } from "@/components/AddEquipmentModal";
 import { UploadEquipmentModal } from "@/components/UploadEquipmentModal";
 import type { Equipment, Role } from "@/lib/types";
@@ -42,31 +42,6 @@ export function DashboardClient({ initialData, role, userName }: DashboardClient
           const due = parseDueDate(i.expected_return_at);
           return due !== null && now > due.getTime();
         }).length;
-
-  const [isTestingWebhook, setIsTestingWebhook] = useState(false);
-
-  async function handleTestWebhook() {
-    try {
-      setIsTestingWebhook(true);
-      const res = await fetch("/api/webhooks/test", { method: "POST" });
-      const data = await res.json().catch(() => ({}));
-      if (res.ok) {
-        alert(
-          `Discord & Club Webhook Test Complete:\n\n` +
-            `• Configured Targets: ${Array.isArray(data.channels) && data.channels.length > 0 ? data.channels.join(", ") : "Discord webhook URL pending (Logged to server console in dev mode)"}\n` +
-            `• Summary: ${data.message}\n\n` +
-            `Tip: Add DISCORD_WEBHOOK_URL to your environment variables to receive live gear alerts in Discord channels.`
-        );
-      } else {
-        alert(data.error || "Failed to broadcast webhook");
-      }
-    } catch (err) {
-      console.error("Webhook test failed:", err);
-      alert("Failed to trigger Discord webhook broadcast.");
-    } finally {
-      setIsTestingWebhook(false);
-    }
-  }
 
   async function handleTriggerReminders() {
     try {
@@ -156,20 +131,6 @@ export function DashboardClient({ initialData, role, userName }: DashboardClient
 
           {isAdminRole(role) && (
             <>
-              <Button
-                variant="outline"
-                onClick={handleTestWebhook}
-                disabled={isTestingWebhook}
-                className="sm:w-auto gap-1.5"
-                title="Test broadcast webhook notification to configured Discord channel"
-              >
-                {isTestingWebhook ? (
-                  <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                ) : (
-                  <Radio className="h-4 w-4 text-indigo-500" />
-                )}
-                Discord Webhook
-              </Button>
               <Button
                 variant="outline"
                 onClick={handleTriggerReminders}

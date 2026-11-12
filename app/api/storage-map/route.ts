@@ -3,7 +3,6 @@ import { getStorageMapData, getStorageMapConfig, saveStorageMapConfig, updateEqu
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { errorResponse, readJsonBody, toErrorResponse, zodErrorMessage } from "@/lib/api-errors";
-import { isAdminRole } from "@/lib/utils";
 
 const MAX_CABINETS = 50;
 const MAX_SHELVES_PER_CABINET = 50;
@@ -71,6 +70,12 @@ export async function GET() {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
+  if (session.user.role !== "developer") {
+    return NextResponse.json(
+      { error: "Forbidden: Storage Map is developer-only." },
+      { status: 403 }
+    );
+  }
 
   try {
     const [cabinets, config] = await Promise.all([getStorageMapData(), getStorageMapConfig()]);
@@ -78,7 +83,7 @@ export async function GET() {
     return NextResponse.json({
       cabinets,
       config,
-      isAdmin: isAdminRole(session.user.role),
+      isAdmin: true,
     });
   } catch (err: unknown) {
     return toErrorResponse(err, "Failed to load storage map");
@@ -91,9 +96,9 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (!isAdminRole(session.user.role)) {
+  if (session.user.role !== "developer") {
     return NextResponse.json(
-      { error: "Forbidden: Only administrators can modify storage layout and assignments." },
+      { error: "Forbidden: Storage Map is developer-only." },
       { status: 403 }
     );
   }

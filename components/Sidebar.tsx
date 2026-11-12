@@ -51,9 +51,9 @@ const navGroups: NavGroup[] = [
     title: "Equipment & Events",
     items: [
       { href: "/dashboard", label: "Equipment", icon: LayoutGrid, roles: ["developer", "admin", "verified", "viewer"] },
-      { href: "/dashboard/reservations", label: "Reservations", icon: CalendarClock, roles: ["developer", "admin"] },
-      { href: "/dashboard/events", label: "Events", icon: Calendar, roles: ["developer", "admin", "verified", "viewer"] },
-      { href: "/dashboard/map", label: "Storage Map", icon: Boxes, roles: ["developer", "admin", "verified", "viewer"] },
+      { href: "/dashboard/reservations", label: "Reservations", icon: CalendarClock, roles: ["developer"] },
+      { href: "/dashboard/events", label: "Events", icon: Calendar, roles: ["developer"] },
+      { href: "/dashboard/map", label: "Storage Map", icon: Boxes, roles: ["developer"] },
       { href: "/dashboard/scan", label: "Scan QR", icon: QrCode, roles: ["developer", "admin", "verified", "viewer"] },
       { href: "/dashboard/nfc", label: "Equipment Checkout", icon: Barcode, roles: ["developer", "admin", "verified"] },
     ],

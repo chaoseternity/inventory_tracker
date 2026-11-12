@@ -1,7 +1,6 @@
 import { auth } from "@/lib/auth";
 import { getEventById, updateEvent, deleteEvent, getUserByEmail } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
-import { isAdminRole } from "@/lib/utils";
 import { z } from "zod";
 import { errorResponse, toErrorResponse, validationErrorResponse } from "@/lib/api-errors";
 
@@ -96,6 +95,9 @@ export async function GET(
 ) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (session.user.role !== "developer") {
+    return NextResponse.json({ error: "Forbidden: Events are developer-only." }, { status: 403 });
+  }
 
   const { id } = await params;
   const eventId = Number(id);
@@ -113,6 +115,9 @@ export async function PUT(
 ) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (session.user.role !== "developer") {
+    return NextResponse.json({ error: "Forbidden: Events are developer-only." }, { status: 403 });
+  }
 
   const { id } = await params;
   const eventId = Number(id);
@@ -123,7 +128,7 @@ export async function PUT(
   if (!event) return NextResponse.json({ error: "Event not found" }, { status: 404 });
 
   const currentUser = await getUserByEmail(session.user.email!);
-  const isAdmin = isAdminRole(session.user.role);
+  const isAdmin = session.user.role === "developer";
   const isOic = currentUser ? event.oics.some((oic) => oic.id === currentUser.id) : false;
 
   if (!isAdmin && !isOic) {
@@ -172,9 +177,12 @@ export async function DELETE(
 ) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  if (session.user.role !== "developer") {
+    return NextResponse.json({ error: "Forbidden: Events are developer-only." }, { status: 403 });
+  }
 
-  if (!isAdminRole(session.user.role)) {
-    return NextResponse.json({ error: "Events can only be deleted by Admin accounts" }, { status: 403 });
+  if (session.user.role !== "developer") {
+    return NextResponse.json({ error: "Forbidden: Events are developer-only." }, { status: 403 });
   }
 
   const { id } = await params;

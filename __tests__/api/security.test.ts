@@ -350,7 +350,7 @@ describe("Security Audits & Vulnerability Guards", () => {
     test("POST /api/events/[id]/section rejects non-numeric event ID with 400", async () => {
       const { auth } = jest.requireMock("@/lib/auth");
       auth.mockResolvedValueOnce({
-        user: { id: "1", name: "Admin", role: "admin", email: "admin@club.com" },
+        user: { id: "1", name: "Developer", role: "developer", email: "dev@club.com" },
       });
 
       const { POST: postSection } = await import("@/app/api/events/[id]/section/route");
@@ -369,7 +369,7 @@ describe("Security Audits & Vulnerability Guards", () => {
     test("POST /api/events/[id]/equipment rejects zero event ID with 400", async () => {
       const { auth } = jest.requireMock("@/lib/auth");
       auth.mockResolvedValueOnce({
-        user: { id: "1", name: "Admin", role: "admin", email: "admin@club.com" },
+        user: { id: "1", name: "Developer", role: "developer", email: "dev@club.com" },
       });
 
       const { POST: postEquipment } = await import("@/app/api/events/[id]/equipment/route");
@@ -612,7 +612,7 @@ describe("Security Audits & Vulnerability Guards", () => {
     test("POST /api/events/[id]/equipment rejects negative equipment_id with 400", async () => {
       const { auth } = jest.requireMock("@/lib/auth");
       auth.mockResolvedValueOnce({
-        user: { id: "1", name: "Admin", role: "admin", email: "admin@club.com" },
+        user: { id: "1", name: "Developer", role: "developer", email: "dev@club.com" },
       });
 
       const { POST: postEquipment } = await import("@/app/api/events/[id]/equipment/route");
@@ -629,7 +629,7 @@ describe("Security Audits & Vulnerability Guards", () => {
     test("POST /api/events/[id]/section rejects negative equipment_id with 400", async () => {
       const { auth } = jest.requireMock("@/lib/auth");
       auth.mockResolvedValueOnce({
-        user: { id: "1", name: "Admin", role: "admin", email: "admin@club.com" },
+        user: { id: "1", name: "Developer", role: "developer", email: "dev@club.com" },
       });
 
       const { POST: postSection } = await import("@/app/api/events/[id]/section/route");
@@ -837,7 +837,7 @@ describe("Security Audits & Vulnerability Guards", () => {
     test("POST /api/events/[id]/equipment returns 404 if event does not exist", async () => {
       const { auth } = jest.requireMock("@/lib/auth");
       auth.mockResolvedValueOnce({
-        user: { id: "1", name: "Admin", role: "admin", email: "admin@club.com" },
+        user: { id: "1", name: "Developer", role: "developer", email: "dev@club.com" },
       });
 
       const { POST: postEquipment } = await import("@/app/api/events/[id]/equipment/route");
@@ -856,7 +856,7 @@ describe("Security Audits & Vulnerability Guards", () => {
     test("POST /api/events/[id]/section returns 404 if event does not exist", async () => {
       const { auth } = jest.requireMock("@/lib/auth");
       auth.mockResolvedValueOnce({
-        user: { id: "1", name: "Admin", role: "admin", email: "admin@club.com" },
+        user: { id: "1", name: "Developer", role: "developer", email: "dev@club.com" },
       });
 
       const { POST: postSection } = await import("@/app/api/events/[id]/section/route");
@@ -976,7 +976,7 @@ describe("Security Audits & Vulnerability Guards", () => {
     test("DELETE /api/events/[id] returns 404 if event does not exist", async () => {
       const { auth } = jest.requireMock("@/lib/auth");
       auth.mockResolvedValueOnce({
-        user: { id: "1", name: "Admin", role: "admin", email: "admin@club.com" },
+        user: { id: "1", name: "Developer", role: "developer", email: "dev@club.com" },
       });
 
       const { DELETE: deleteEventRoute } = await import("@/app/api/events/[id]/route");
@@ -1023,7 +1023,7 @@ describe("Security Audits & Vulnerability Guards", () => {
     test("POST /api/events rejects non-date timestamp string with 400 (CWE-20/1287)", async () => {
       const { auth } = jest.requireMock("@/lib/auth");
       auth.mockResolvedValueOnce({
-        user: { id: "1", name: "Admin", role: "admin", email: "admin@club.com" },
+        user: { id: "1", name: "Developer", role: "developer", email: "dev@club.com" },
       });
 
       const { POST: createEventRoute } = await import("@/app/api/events/route");
@@ -1132,7 +1132,7 @@ describe("Security Audits & Vulnerability Guards", () => {
     test("POST /api/events/[id]/section returns 400 for malformed JSON body (CWE-755/20)", async () => {
       const { auth } = jest.requireMock("@/lib/auth");
       auth.mockResolvedValueOnce({
-        user: { id: "1", name: "Admin", role: "admin", email: "admin@club.com" },
+        user: { id: "1", name: "Developer", role: "developer", email: "dev@club.com" },
       });
 
       const { POST: sectionRoute } = await import("@/app/api/events/[id]/section/route");
