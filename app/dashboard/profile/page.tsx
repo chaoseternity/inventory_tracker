@@ -6,6 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { ShieldAlert, UserX } from "lucide-react";
 import Link from "next/link";
+import { isAdminRole } from "@/lib/utils";
 
 interface ProfilePageProps {
   searchParams: Promise<{ id?: string }>;
@@ -20,7 +21,7 @@ export default async function ProfilePage({ searchParams }: ProfilePageProps) {
 
   const currentUserId = currentUser.id;
   const currentUserRole = currentUser.role;
-  const isAdmin = currentUserRole === "admin";
+  const isAdmin = isAdminRole(currentUserRole);
 
   const params = await searchParams;
   let targetUserId = currentUserId;

@@ -31,6 +31,7 @@ import { UserLink } from "@/components/UserLink";
 import { cn } from "@/lib/utils";
 import { formatDate, formatDateTime, isDateOnly, parseDbDate, parseDueDate } from "@/lib/timezone";
 import { readErrorMessage, networkErrorMessage } from "@/lib/fetch-error";
+import { isAdminRole, isVerifiedOrHigher } from "@/lib/utils";
 import type { EquipmentDetail, Role, Checkout, Tag, EventEquipmentLog } from "@/lib/types";
 
 interface EquipmentModalProps {
@@ -78,10 +79,10 @@ export function EquipmentModal({
   const [actionNotice, setActionNotice] = useState<string | null>(null);
   const [actionBusy, setActionBusy] = useState<"return" | "delete" | null>(null);
 
-  const isAdmin = role === "admin";
-  const canCheckout = role === "admin" || role === "verified";
-  const canEditAll = role === "admin";
-  const canEditDescription = role === "admin" || role === "verified";
+  const isAdmin = isAdminRole(role);
+  const canCheckout = isVerifiedOrHigher(role);
+  const canEditAll = isAdminRole(role);
+  const canEditDescription = isVerifiedOrHigher(role);
 
   const {
     register,

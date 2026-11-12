@@ -6,10 +6,21 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export const ALL_ROLES: Role[] = ["developer", "admin", "verified", "viewer"];
+
+export function isAdminRole(role?: string | null): boolean {
+  return role === "admin" || role === "developer";
+}
+
+export function isVerifiedOrHigher(role?: string | null): boolean {
+  return role === "admin" || role === "developer" || role === "verified";
+}
+
 export const roleBadgeClass: Record<Role, string> = {
-  admin:    "bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-300",
-  verified: "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/40 dark:text-green-400",
-  viewer:   "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300",
+  developer: "bg-purple-100 text-purple-800 border-purple-200 dark:bg-purple-900/40 dark:text-purple-300",
+  admin:     "bg-indigo-100 text-indigo-800 border-indigo-200 dark:bg-indigo-900/40 dark:text-indigo-300",
+  verified:  "bg-green-100 text-green-700 border-green-200 dark:bg-green-900/40 dark:text-green-400",
+  viewer:    "bg-slate-100 text-slate-600 border-slate-200 dark:bg-slate-800 dark:text-slate-300",
 };
 
 export interface ParsedEquipmentId {

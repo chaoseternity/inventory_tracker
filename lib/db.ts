@@ -1,5 +1,6 @@
 import { sql, ensureSchema, batch, stmt, rawStmt, query, type BoundStatement } from "./d1";
 import { deleteSopFile, deleteResourceFile } from "./r2";
+import { isAdminRole } from "./utils";
 import { formatLongDateTime, parseDbDate, parseDueDate } from "./timezone";
 import type {
   Equipment,
@@ -432,7 +433,7 @@ export async function upsertUser(params: {
   const isAdminEmail = adminEmails.has(normalizedEmail);
 
   if (existing) {
-    const newRole = params.role ?? (isAdminEmail && existing.role !== "admin" ? "admin" : existing.role);
+    const newRole = params.role ?? (isAdminEmail && !isAdminRole(existing.role) ? "admin" : existing.role);
     const newImage = params.image ?? existing.image;
     await sql`
       UPDATE users
@@ -460,7 +461,7 @@ export async function upsertUser(params: {
 
 export async function countAdmins(): Promise<number> {
   await ensureSchema();
-  const { rows } = await sql<{ c: number | string }>`SELECT COUNT(*) as c FROM users WHERE role = 'admin'`;
+  const { rows } = await sql<{ c: number | string }>`SELECT COUNT(*) as c FROM users WHERE role IN ('admin', 'developer')`;
   return parseInt(String(rows[0]?.c ?? "0"), 10);
 }
 
@@ -473,17 +474,17 @@ export async function updateUserRole(id: number, role: Role): Promise<{ success:
   if (!user) {
     return { success: false, error: "User not found" };
   }
-  if (role !== "admin" && isConfiguredAdminEmail(user.email)) {
+  if (!isAdminRole(role) && isConfiguredAdminEmail(user.email)) {
     // upsertUser re-promotes ADMIN_EMAILS accounts on every login, so a demotion here would
     // silently revert. Remove the address from ADMIN_EMAILS instead.
     throw new ConfiguredAdminError();
   }
-  if (user.role === "admin" && role !== "admin") {
+  if (isAdminRole(user.role) && !isAdminRole(role)) {
     // Conditional UPDATE so two concurrent demotions can't remove the last two admins.
     const { rowCount } = await sql`
       UPDATE users SET role = ${role}
       WHERE id = ${id}
-        AND (SELECT COUNT(*) FROM users WHERE role = 'admin' AND id <> ${id}) >= 1
+        AND (SELECT COUNT(*) FROM users WHERE role IN ('admin', 'developer') AND id <> ${id}) >= 1
     `;
     if (rowCount === 0) {
       return { success: false, error: "Cannot demote the only remaining admin account." };
@@ -503,7 +504,7 @@ export async function deleteUser(id: number): Promise<{ success: boolean; error?
   if (!user) {
     return { success: false, error: "User not found" };
   }
-  if (user.role === "admin") {
+  if (isAdminRole(user.role)) {
     const adminCount = await countAdmins();
     if (adminCount <= 1) {
       return { success: false, error: "Cannot delete the only remaining admin account." };
@@ -3508,7 +3509,7 @@ async function getHandoverIneligibility(checkout: Checkout): Promise<string | nu
     return "Handover is not available for equipment checked out through the NFC station.";
   }
   const borrower = await getUserById(checkout.checked_out_by);
-  if (borrower?.role !== "admin") {
+  if (!isAdminRole(borrower?.role)) {
     return "Handover is only available for equipment checked out under an admin account.";
   }
   return null;
@@ -3530,7 +3531,7 @@ export async function createHandoverCode(
   if (ineligible) throw new Error(ineligible);
   if (checkout.checked_out_by !== fromUserId) {
     const userRes = await getUserById(fromUserId);
-    if (userRes?.role !== "admin") {
+    if (!isAdminRole(userRes?.role)) {
       throw new Error("Forbidden: You can only handover equipment checked out to you.");
     }
   }

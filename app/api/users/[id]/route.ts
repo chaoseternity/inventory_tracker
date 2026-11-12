@@ -2,9 +2,10 @@ import { auth } from "@/lib/auth";
 import { getUserById, updateUserRole, deleteUser } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { resultErrorResponse, toErrorResponse, validationErrorResponse } from "@/lib/api-errors";
+import { isAdminRole } from "@/lib/utils";
 import { z } from "zod";
 
-const UpdateUserSchema = z.object({ role: z.enum(["admin", "verified", "viewer"]) });
+const UpdateUserSchema = z.object({ role: z.enum(["developer", "admin", "verified", "viewer"]) });
 
 export async function PUT(
   req: NextRequest,
@@ -12,7 +13,7 @@ export async function PUT(
 ) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user.role !== "admin") {
+  if (!isAdminRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -43,7 +44,7 @@ export async function PUT(
     Number(session.user.id) === userId ||
     Boolean(session.user.email && user.email.toLowerCase() === session.user.email.toLowerCase());
 
-  if (isSelf && parsed.data.role !== "admin") {
+  if (isSelf && !isAdminRole(parsed.data.role)) {
     return NextResponse.json({ error: "Cannot demote your own admin account" }, { status: 400 });
   }
 
@@ -65,7 +66,7 @@ export async function DELETE(
 ) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user.role !== "admin") {
+  if (!isAdminRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

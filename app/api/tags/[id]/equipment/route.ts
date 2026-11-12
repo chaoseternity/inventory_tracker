@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { getEquipmentByTagId, addTagToEquipment } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { toErrorResponse, validationErrorResponse } from "@/lib/api-errors";
+import { isAdminRole } from "@/lib/utils";
 import { z } from "zod";
 
 export async function GET(
@@ -28,7 +29,7 @@ export async function POST(
 ) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user.role !== "admin")
+  if (!isAdminRole(session.user.role))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { id } = await params;

@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { getAllUsers, getUserByEmail } from "@/lib/db";
 import { redirect } from "next/navigation";
+import { isAdminRole } from "@/lib/utils";
 import { UsersManager } from "@/components/UsersManager";
 
 export default async function UsersPage() {
@@ -8,7 +9,7 @@ export default async function UsersPage() {
   if (!session?.user?.email) redirect("/login");
 
   const currentUser = await getUserByEmail(session.user.email);
-  if (!currentUser || currentUser.role !== "admin") redirect("/dashboard");
+  if (!currentUser || !isAdminRole(currentUser.role)) redirect("/dashboard");
 
   const users = await getAllUsers();
 

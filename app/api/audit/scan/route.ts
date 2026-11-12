@@ -3,6 +3,7 @@ import { recordAuditScan } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { errorResponse, readJsonBody, resultErrorResponse, toErrorResponse } from "@/lib/api-errors";
+import { isAdminRole } from "@/lib/utils";
 
 const sessionIdSchema = z.union([
   z.number().int().positive(),
@@ -30,7 +31,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (session.user.role !== "admin") {
+  if (!isAdminRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden: Admin access required." }, { status: 403 });
   }
 

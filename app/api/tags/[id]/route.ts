@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { deleteTag, getAllTags } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
+import { isAdminRole } from "@/lib/utils";
 
 export async function GET(
   _req: NextRequest,
@@ -27,7 +28,7 @@ export async function DELETE(
 ) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user.role !== "admin") {
+  if (!isAdminRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

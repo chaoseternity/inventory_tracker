@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { returnCheckout, getEquipmentById, getUserByEmail } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { toErrorResponse } from "@/lib/api-errors";
+import { isAdminRole } from "@/lib/utils";
 
 export async function POST(
   _req: NextRequest,
@@ -22,7 +23,7 @@ export async function POST(
   const equipment = await getEquipmentById(eqId);
   if (!equipment) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
-  const isAdmin = session.user.role === "admin";
+  const isAdmin = isAdminRole(session.user.role);
   const activeCheckout = equipment.active_checkout;
   if (!isAdmin && activeCheckout) {
     const dbUser = await getUserByEmail(session.user.email);

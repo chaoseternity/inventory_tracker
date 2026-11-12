@@ -55,6 +55,7 @@ import remarkGfm from "remark-gfm";
 import { safeMarkdownComponents } from "@/components/safe-markdown";
 import { formatDate } from "@/lib/timezone";
 import { readErrorMessage } from "@/lib/fetch-error";
+import { isAdminRole } from "@/lib/utils";
 
 interface SOPManagerProps {
   initialDocuments: SOPDocument[];
@@ -226,7 +227,7 @@ export function SOPManager({ initialDocuments, role, userName }: SOPManagerProps
   const [previewCitation, setPreviewCitation] = useState<SOPCitation | null>(null);
   const [previewOpen, setPreviewOpen] = useState(false);
 
-  const isAdmin = role === "admin";
+  const isAdmin = isAdminRole(role);
 
   // Restore this tab's chat from sessionStorage after mount (avoids hydration mismatch).
   useEffect(() => {

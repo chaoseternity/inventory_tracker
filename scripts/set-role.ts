@@ -12,7 +12,9 @@
 
 import { getUserByEmail, updateUserRole } from "../lib/db";
 
-function parseArgs(): { email: string; role: "admin" | "verified" | "viewer" } {
+import type { Role } from "../lib/types";
+
+function parseArgs(): { email: string; role: Role } {
   const args = process.argv.slice(2);
   const get = (flag: string) =>
     args.find((a) => a.startsWith(`--${flag}=`))?.split("=")[1];
@@ -24,8 +26,8 @@ function parseArgs(): { email: string; role: "admin" | "verified" | "viewer" } {
     console.error("Error: --email is required");
     process.exit(1);
   }
-  if (role !== "admin" && role !== "verified" && role !== "viewer") {
-    console.error('Error: --role must be "admin", "verified", or "viewer"');
+  if (role !== "developer" && role !== "admin" && role !== "verified" && role !== "viewer") {
+    console.error('Error: --role must be "developer", "admin", "verified", or "viewer"');
     process.exit(1);
   }
 

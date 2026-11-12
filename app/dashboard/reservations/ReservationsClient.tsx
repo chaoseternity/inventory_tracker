@@ -30,7 +30,7 @@ import {
 } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import type { Equipment, Reservation, Role } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, isAdminRole } from "@/lib/utils";
 import { APP_TIMEZONE, formatDateTime, parseDbDate } from "@/lib/timezone";
 import { readErrorMessage } from "@/lib/fetch-error";
 import { useNow } from "@/lib/use-now";
@@ -105,7 +105,7 @@ export function ReservationsClient({
   const [fulfillingId, setFulfillingId] = useState<number | null>(null);
 
   // The reservations tab is admin-only (enforced by the page and API).
-  const isAdmin = role === "admin";
+  const isAdmin = isAdminRole(role);
   const canCreate = isAdmin;
 
   // Filtered reservations

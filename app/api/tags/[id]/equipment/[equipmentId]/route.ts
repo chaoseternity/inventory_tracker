@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { removeTagFromEquipment } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { resultErrorResponse, toErrorResponse } from "@/lib/api-errors";
+import { isAdminRole } from "@/lib/utils";
 
 export async function DELETE(
   _req: NextRequest,
@@ -9,7 +10,7 @@ export async function DELETE(
 ) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user.role !== "admin")
+  if (!isAdminRole(session.user.role))
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
 
   const { id, equipmentId } = await params;

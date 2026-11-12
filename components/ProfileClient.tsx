@@ -25,7 +25,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { cn, roleBadgeClass } from "@/lib/utils";
+import { cn, roleBadgeClass, isAdminRole } from "@/lib/utils";
 import type { Role, UserProfileData, UserProfileCheckout } from "@/lib/types";
 import { EventDetailModal } from "@/components/EventDetailModal";
 import { HandoverModal } from "@/components/HandoverModal";
@@ -64,7 +64,7 @@ export function ProfileClient({
   const now = useNow();
 
   const user = data.user;
-  const isAdmin = viewerRole === "admin";
+  const isAdmin = isAdminRole(viewerRole);
   const canReturnEquipment = isAdmin || viewerRole === "verified" || isSelf;
 
   async function handleReturn(checkout: UserProfileCheckout) {
@@ -338,7 +338,7 @@ export function ProfileClient({
                         </span>
                         <div className="flex items-center gap-1.5 shrink-0">
                           {/* Handover is only offered for web checkouts made under an admin account (not NFC-station loans). */}
-                          {isSelf && user.role === "admin" && eq.checked_out_by === user.id && !eq.nfc_value && (
+                          {isSelf && isAdminRole(user.role) && eq.checked_out_by === user.id && !eq.nfc_value && (
                             <Button
                               variant="secondary"
                               size="sm"

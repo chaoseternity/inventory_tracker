@@ -13,6 +13,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { validationErrorResponse } from "@/lib/api-errors";
 import { z } from "zod";
 import { nfcErrorResponse } from "../errors";
+import { isAdminRole } from "@/lib/utils";
 
 const NfcReturnSchema = z.object({
   equipment_id: z.number().int().positive().optional(),
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest) {
     const { barcode, equipment_ids } = parsed.data;
     const cardValue = (parsed.data.nfc_value || parsed.data.nfc_id || "").trim();
     const dbUser = session.user?.email ? await getUserByEmail(session.user.email) : null;
-    const isAdmin = session.user.role === "admin" || dbUser?.role === "admin";
+    const isAdmin = isAdminRole(session.user.role) || isAdminRole(dbUser?.role);
     const callerId = dbUser?.id ?? Number(session.user.id);
 
     let card: Awaited<ReturnType<typeof getNfcCardByValue>> = undefined;

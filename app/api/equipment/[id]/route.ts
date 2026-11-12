@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { getEquipmentById, updateEquipment, deleteEquipment } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { readJsonBody, toErrorResponse, validationErrorResponse } from "@/lib/api-errors";
+import { isAdminRole } from "@/lib/utils";
 import { z } from "zod";
 
 /** Statuses an admin may set directly. */
@@ -63,7 +64,7 @@ export async function PUT(
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const { role } = session.user;
-  if (role !== "admin" && role !== "verified") {
+  if (!isAdminRole(role) && role !== "verified") {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -110,7 +111,7 @@ export async function DELETE(
 ) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user.role !== "admin") {
+  if (!isAdminRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

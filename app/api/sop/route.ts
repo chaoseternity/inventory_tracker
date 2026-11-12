@@ -6,6 +6,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { declaredContentLength, isUploadedFile, zodErrorMessage } from "@/lib/api-errors";
 import { checkUploadFormat, extractionErrorMessage } from "./upload-format";
+import { isAdminRole } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
@@ -89,7 +90,7 @@ export async function POST(req: NextRequest) {
 
     const email = session.user?.email;
     const currentUser = email ? await getUserByEmail(email) : undefined;
-    const isAdmin = session.user?.role === "admin" || currentUser?.role === "admin";
+    const isAdmin = isAdminRole(session.user?.role) || isAdminRole(currentUser?.role);
 
     if (!isAdmin) {
       return NextResponse.json(

@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { createCheckout, getEquipmentById, getUserByEmail, getUserByName } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { toErrorResponse, validationErrorResponse } from "@/lib/api-errors";
+import { isAdminRole } from "@/lib/utils";
 import { z } from "zod";
 
 const CheckoutSchema = z.object({
@@ -55,7 +56,7 @@ export async function POST(
 
   try {
     const dbUser = session.user.email ? await getUserByEmail(session.user.email) : null;
-    const isAdmin = session.user.role === "admin" || dbUser?.role === "admin";
+    const isAdmin = isAdminRole(session.user.role) || isAdminRole(dbUser?.role);
     const finalCheckedOutByName =
       isAdmin && parsed.data.checked_out_by_name?.trim()
         ? parsed.data.checked_out_by_name.trim()

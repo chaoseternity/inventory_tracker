@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { getAllUsers } from "@/lib/db";
 import { NextResponse } from "next/server";
 import { toErrorResponse } from "@/lib/api-errors";
+import { isAdminRole } from "@/lib/utils";
 
 /**
  * GET /api/users
@@ -20,7 +21,7 @@ export async function GET() {
   } catch (err: unknown) {
     return toErrorResponse(err, "Failed to load users");
   }
-  if (session.user.role === "admin") {
+  if (isAdminRole(session.user.role)) {
     return NextResponse.json(users);
   }
 

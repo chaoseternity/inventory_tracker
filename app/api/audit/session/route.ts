@@ -3,6 +3,7 @@ import { getActiveAuditSession, getAuditSessionDetails, startAuditSession } from
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { readJsonBody, toErrorResponse, validationErrorResponse } from "@/lib/api-errors";
+import { isAdminRole } from "@/lib/utils";
 
 const StartAuditSchema = z.object({
   name: z.string({ error: "name must be a string" }).trim().max(200, "name cannot exceed 200 characters").nullable().optional(),
@@ -14,7 +15,7 @@ export async function GET(req: NextRequest) {
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (session.user.role !== "admin") {
+  if (!isAdminRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden: Admin access required." }, { status: 403 });
   }
 
@@ -57,7 +58,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (session.user.role !== "admin") {
+  if (!isAdminRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden: Admin access required." }, { status: 403 });
   }
 

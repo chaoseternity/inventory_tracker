@@ -15,6 +15,7 @@ import { sendDeploymentInvitationEmail, type EmailSendResult } from "@/lib/email
 import type { AppEvent, EventSection } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 import { resultErrorResponse, validationErrorResponse } from "@/lib/api-errors";
+import { isAdminRole } from "@/lib/utils";
 import { z } from "zod";
 
 const SectionEquipmentSchema = z.object({
@@ -48,7 +49,7 @@ function describeEmailResult(result: EmailSendResult): { emailSent: boolean; ema
 }
 
 function verifySectionPermission(event: AppEvent, section: EventSection, userEmail: string, role: string, currentUserId?: number): boolean {
-  if (role === "admin") return true;
+  if (isAdminRole(role)) return true;
   if (!currentUserId) return false;
 
   // OICs can manage any section

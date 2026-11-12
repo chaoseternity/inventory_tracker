@@ -3,6 +3,7 @@ import { extractTextFromDocument } from "@/lib/doc-parser";
 import { NextRequest, NextResponse } from "next/server";
 import { declaredContentLength, errorResponse, isUploadedFile } from "@/lib/api-errors";
 import { checkUploadFormat, extractionErrorMessage } from "../upload-format";
+import { isAdminRole } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
@@ -15,7 +16,7 @@ export async function POST(req: NextRequest) {
   if (!session) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (session.user.role !== "admin") {
+  if (!isAdminRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden: Admins only" }, { status: 403 });
   }
 

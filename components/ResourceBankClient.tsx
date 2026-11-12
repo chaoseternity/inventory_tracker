@@ -36,6 +36,7 @@ import {
 import type { EventSection, ResourceItem, Role } from "@/lib/types";
 import { formatDate } from "@/lib/timezone";
 import { readErrorMessage, networkErrorMessage } from "@/lib/fetch-error";
+import { isAdminRole, isVerifiedOrHigher } from "@/lib/utils";
 
 interface ResourceBankClientProps {
   initialResources: ResourceItem[];
@@ -147,10 +148,10 @@ export function ResourceBankClient({
 
   const [deletingId, setDeletingId] = useState<number | null>(null);
 
-  const canUpload = role === "admin" || role === "verified";
+  const canUpload = isVerifiedOrHigher(role);
 
   function canModify(item: ResourceItem): boolean {
-    if (role === "admin") return true;
+    if (isAdminRole(role)) return true;
     if (role !== "verified") return false;
     return currentUserId !== null && item.uploaded_by === currentUserId;
   }

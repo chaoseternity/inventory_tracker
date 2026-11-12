@@ -1,4 +1,4 @@
-export type Role = "admin" | "verified" | "viewer";
+export type Role = "developer" | "admin" | "verified" | "viewer";
 
 export type Condition = "Working" | "Impaired" | "Broken" | "Missing" | "Retired";
 

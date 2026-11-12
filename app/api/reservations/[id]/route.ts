@@ -3,6 +3,7 @@ import { getReservationById, cancelReservation, fulfillReservation } from "@/lib
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { readJsonBody, resultErrorResponse, toErrorResponse, zodErrorMessage, errorResponse } from "@/lib/api-errors";
+import { isAdminRole } from "@/lib/utils";
 
 const PatchReservationSchema = z.object({
   action: z.enum(["fulfill"], { error: "Unsupported action." }).optional(),
@@ -16,7 +17,7 @@ export async function GET(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (session.user.role !== "admin") {
+  if (!isAdminRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden: Reservations are admin-only." }, { status: 403 });
   }
 
@@ -45,7 +46,7 @@ export async function DELETE(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (session.user.role !== "admin") {
+  if (!isAdminRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden: Reservations are admin-only." }, { status: 403 });
   }
 
@@ -56,7 +57,7 @@ export async function DELETE(
   }
 
   const userId = Number(session.user.id);
-  const isAdmin = session.user.role === "admin";
+  const isAdmin = isAdminRole(session.user.role);
 
   try {
     const result = await cancelReservation(resId, userId, isAdmin);
@@ -78,7 +79,7 @@ export async function PATCH(
   if (!session?.user) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if (session.user.role !== "admin") {
+  if (!isAdminRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden: Reservations are admin-only." }, { status: 403 });
   }
 

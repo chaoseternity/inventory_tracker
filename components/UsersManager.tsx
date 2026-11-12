@@ -5,11 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trash2, Pencil, Check, X } from "lucide-react";
 import type { User, Role } from "@/lib/types";
-import { roleBadgeClass } from "@/lib/utils";
+import { roleBadgeClass, ALL_ROLES } from "@/lib/utils";
 import { UserLink } from "./UserLink";
 import { readErrorMessage, networkErrorMessage } from "@/lib/fetch-error";
 
-const ROLE_OPTIONS: Role[] = ["admin", "verified", "viewer"];
+const ROLE_OPTIONS: Role[] = ALL_ROLES;
 
 interface UsersManagerProps {
   users: User[];

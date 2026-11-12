@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { getSOPDocumentById, updateSOPDocument, deleteSOPDocument } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { toErrorResponse, validationErrorResponse } from "@/lib/api-errors";
+import { isAdminRole } from "@/lib/utils";
 import { z } from "zod";
 
 const UpdateSOPSchema = z.object({
@@ -36,7 +37,7 @@ export async function PUT(
 ) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user.role !== "admin") {
+  if (!isAdminRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden: Admins only" }, { status: 403 });
   }
 
@@ -73,7 +74,7 @@ export async function DELETE(
 ) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user.role !== "admin") {
+  if (!isAdminRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden: Admins only" }, { status: 403 });
   }
 

@@ -1,13 +1,14 @@
 import { auth } from "@/lib/auth";
 import { getActiveAuditSession, getAuditSessionDetails, getAllEquipment } from "@/lib/db";
 import { redirect } from "next/navigation";
+import { isAdminRole } from "@/lib/utils";
 import { AuditClient } from "./AuditClient";
 
 export default async function AuditPage() {
   const session = await auth();
   if (!session) redirect("/login");
 
-  if (session.user.role !== "admin") {
+  if (!isAdminRole(session.user.role)) {
     redirect("/dashboard");
   }
 

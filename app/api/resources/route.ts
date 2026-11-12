@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { getAllResources, createResource, getUserByEmail } from "@/lib/db";
 import { putResourceFile, deleteResourceFile } from "@/lib/r2";
 import { declaredContentLength, isUploadedFile, toErrorResponse, zodErrorMessage } from "@/lib/api-errors";
+import { isVerifiedOrHigher } from "@/lib/utils";
 import type { EventSection } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
@@ -80,7 +81,7 @@ export async function POST(req: NextRequest) {
 
   const currentUser = session.user?.email ? await getUserByEmail(session.user.email) : undefined;
   const effectiveRole = currentUser?.role ?? session.user?.role;
-  if (effectiveRole !== "admin" && effectiveRole !== "verified") {
+  if (!isVerifiedOrHigher(effectiveRole)) {
     return NextResponse.json(
       { error: "Forbidden: Only verified members and admins can upload session materials." },
       { status: 403 }

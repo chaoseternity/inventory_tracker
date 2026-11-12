@@ -8,6 +8,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import type { Tag as TagType, Equipment, Role } from "@/lib/types";
 import { readErrorMessage, networkErrorMessage } from "@/lib/fetch-error";
+import { isAdminRole } from "@/lib/utils";
 
 interface TagsManagerProps {
   initialTags: TagType[];
@@ -115,7 +116,7 @@ export function TagsManager({ initialTags, initialEquipment, role }: TagsManager
   const [error, setError] = useState<string | null>(null);
   const [expanded, setExpanded] = useState<Set<number>>(new Set());
 
-  const isAdmin = role === "admin";
+  const isAdmin = isAdminRole(role);
 
   // Derive items-per-tag from allEquipment tags array
   function getItemsForTag(tagName: string) {

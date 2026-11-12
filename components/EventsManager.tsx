@@ -28,6 +28,7 @@ import { SectionRehearsalModal } from "./SectionRehearsalModal";
 import { UserLink } from "./UserLink";
 import type { AppEvent, Role, EventSection } from "@/lib/types";
 import { formatDateTime } from "@/lib/timezone";
+import { isAdminRole } from "@/lib/utils";
 
 interface EventsManagerProps {
   initialEvents: AppEvent[];
@@ -49,7 +50,7 @@ export function EventsManager({ initialEvents, role, currentUserId }: EventsMana
 
   const [actionError, setActionError] = useState<string | null>(null);
 
-  const isAdmin = role === "admin";
+  const isAdmin = isAdminRole(role);
 
   async function readError(res: Response, fallback: string): Promise<string> {
     const data: unknown = await res.json().catch(() => null);

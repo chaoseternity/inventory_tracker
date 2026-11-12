@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { createHandoverCode, getEquipmentById } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { toErrorResponse } from "@/lib/api-errors";
+import { isAdminRole } from "@/lib/utils";
 
 export async function POST(
   _req: NextRequest,
@@ -30,7 +31,7 @@ export async function POST(
   // Handovers only exist for checkouts made under an admin account (enforced again in
   // createHandoverCode, which also rejects NFC-station checkouts), so only admins can
   // generate a code.
-  if (session.user.role !== "admin") {
+  if (!isAdminRole(session.user.role)) {
     return NextResponse.json(
       { error: "Forbidden: Handover is only available for equipment checked out under an admin account." },
       { status: 403 }

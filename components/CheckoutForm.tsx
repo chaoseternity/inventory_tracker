@@ -10,6 +10,7 @@ import { useState, useEffect } from "react";
 import { readErrorMessage, networkErrorMessage } from "@/lib/fetch-error";
 import { fetchUserDirectory, type DirectoryUser } from "@/lib/user-directory";
 import type { Role } from "@/lib/types";
+import { isAdminRole } from "@/lib/utils";
 
 const CheckoutSchema = z.object({
   checked_out_by_name: z.string().min(1, "Name is required"),
@@ -28,7 +29,7 @@ interface CheckoutFormProps {
 }
 
 export function CheckoutForm({ equipmentId, defaultName, role, onSuccess }: CheckoutFormProps) {
-  const isAdmin = role === "admin";
+  const isAdmin = isAdminRole(role);
   const [users, setUsers] = useState<DirectoryUser[]>([]);
   const [loadingUsers, setLoadingUsers] = useState(false);
 

@@ -10,7 +10,7 @@ export const SCHEMA_SQL = `
     email      TEXT    NOT NULL UNIQUE,
     google_id  TEXT,
     image      TEXT,
-    role       TEXT    NOT NULL DEFAULT 'viewer' CHECK(role IN ('admin','verified','viewer')),
+    role       TEXT    NOT NULL DEFAULT 'viewer' CHECK(role IN ('developer','admin','verified','viewer')),
     provider   TEXT,
     created_at TEXT    NOT NULL DEFAULT (datetime('now'))
   );

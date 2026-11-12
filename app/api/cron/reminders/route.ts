@@ -3,6 +3,7 @@ import { processReturnReminders, getPendingReturnReminders } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { toErrorResponse } from "@/lib/api-errors";
 import { timingSafeEqualString } from "@/lib/request-security";
+import { isAdminRole } from "@/lib/utils";
 
 export const runtime = "nodejs";
 
@@ -35,7 +36,7 @@ function isAuthorizedCron(req: NextRequest): boolean {
 
 async function isAdminSession(): Promise<boolean> {
   const session = await auth();
-  return session?.user?.role === "admin";
+  return isAdminRole(session?.user?.role);
 }
 
 function unauthorized() {

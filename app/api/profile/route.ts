@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { getUserByEmail, getUserProfileData } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
+import { isAdminRole } from "@/lib/utils";
 
 export async function GET(req: NextRequest) {
   const session = await auth();
@@ -15,7 +16,7 @@ export async function GET(req: NextRequest) {
 
   const currentUserId = currentUser.id;
   const currentUserRole = currentUser.role;
-  const isAdmin = currentUserRole === "admin";
+  const isAdmin = isAdminRole(currentUserRole);
 
   const { searchParams } = new URL(req.url);
   const targetIdParam = searchParams.get("id");

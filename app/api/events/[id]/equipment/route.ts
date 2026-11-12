@@ -9,6 +9,7 @@ import {
 import type { AppEvent, EventSection } from "@/lib/types";
 import { NextRequest, NextResponse } from "next/server";
 import { resultErrorResponse, validationErrorResponse } from "@/lib/api-errors";
+import { isAdminRole } from "@/lib/utils";
 import { z } from "zod";
 
 const EquipmentEventSchema = z.object({
@@ -17,7 +18,7 @@ const EquipmentEventSchema = z.object({
 });
 
 function canManageEventEquipment(event: AppEvent, section: EventSection, userEmail: string, role: string, currentUserId?: number): boolean {
-  if (role === "admin") return true;
+  if (isAdminRole(role)) return true;
   if (currentUserId && event.oics.some((u) => u.id === currentUserId)) return true;
   const secIcs = event.section_ics[section] || [];
   return !!currentUserId && secIcs.some((ic) => ic.id === currentUserId);

@@ -3,6 +3,7 @@ import { sendClubWebhook } from "@/lib/webhook";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 import { readJsonBody, toErrorResponse, validationErrorResponse } from "@/lib/api-errors";
+import { isAdminRole } from "@/lib/utils";
 
 const WebhookTestSchema = z.object({
   message: z
@@ -43,7 +44,7 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (session.user.role !== "admin") {
+  if (!isAdminRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden: Admin role required to test club webhooks." }, { status: 403 });
   }
 

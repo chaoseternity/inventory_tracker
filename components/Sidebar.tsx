@@ -50,33 +50,33 @@ const navGroups: NavGroup[] = [
   {
     title: "Equipment & Events",
     items: [
-      { href: "/dashboard", label: "Equipment", icon: LayoutGrid, roles: ["admin", "verified", "viewer"] },
-      { href: "/dashboard/reservations", label: "Reservations", icon: CalendarClock, roles: ["admin"] },
-      { href: "/dashboard/events", label: "Events", icon: Calendar, roles: ["admin", "verified", "viewer"] },
-      { href: "/dashboard/map", label: "Storage Map", icon: Boxes, roles: ["admin", "verified", "viewer"] },
-      { href: "/dashboard/scan", label: "Scan QR", icon: QrCode, roles: ["admin", "verified", "viewer"] },
-      { href: "/dashboard/nfc", label: "Equipment Checkout", icon: Barcode, roles: ["admin", "verified"] },
+      { href: "/dashboard", label: "Equipment", icon: LayoutGrid, roles: ["developer", "admin", "verified", "viewer"] },
+      { href: "/dashboard/reservations", label: "Reservations", icon: CalendarClock, roles: ["developer", "admin"] },
+      { href: "/dashboard/events", label: "Events", icon: Calendar, roles: ["developer", "admin", "verified", "viewer"] },
+      { href: "/dashboard/map", label: "Storage Map", icon: Boxes, roles: ["developer", "admin", "verified", "viewer"] },
+      { href: "/dashboard/scan", label: "Scan QR", icon: QrCode, roles: ["developer", "admin", "verified", "viewer"] },
+      { href: "/dashboard/nfc", label: "Equipment Checkout", icon: Barcode, roles: ["developer", "admin", "verified"] },
     ],
   },
   {
     title: "SOP & Resources",
     items: [
-      { href: "/dashboard/sop", label: "SOP & AI", icon: Bot, roles: ["admin", "verified", "viewer"] },
-      { href: "/dashboard/resources", label: "Resource Bank", icon: FolderArchive, roles: ["admin", "verified", "viewer"] },
+      { href: "/dashboard/sop", label: "SOP & AI", icon: Bot, roles: ["developer", "admin", "verified", "viewer"] },
+      { href: "/dashboard/resources", label: "Resource Bank", icon: FolderArchive, roles: ["developer", "admin", "verified", "viewer"] },
     ],
   },
   {
     title: "Account",
     items: [
-      { href: "/dashboard/profile", label: "Profile", icon: UserIcon, roles: ["admin", "verified", "viewer"] },
+      { href: "/dashboard/profile", label: "Profile", icon: UserIcon, roles: ["developer", "admin", "verified", "viewer"] },
     ],
   },
   {
     title: "Admin & Settings",
     items: [
-      { href: "/dashboard/audit", label: "Stock Audit", icon: ClipboardCheck, roles: ["admin"] },
-      { href: "/dashboard/tags", label: "Tags", icon: Tag, roles: ["admin"] },
-      { href: "/dashboard/users", label: "Users", icon: UsersIcon, roles: ["admin"] },
+      { href: "/dashboard/audit", label: "Stock Audit", icon: ClipboardCheck, roles: ["developer", "admin"] },
+      { href: "/dashboard/tags", label: "Tags", icon: Tag, roles: ["developer", "admin"] },
+      { href: "/dashboard/users", label: "Users", icon: UsersIcon, roles: ["developer", "admin"] },
     ],
   },
 ];

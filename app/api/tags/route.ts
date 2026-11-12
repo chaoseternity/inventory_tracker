@@ -2,6 +2,7 @@ import { auth } from "@/lib/auth";
 import { getAllTags, createTag } from "@/lib/db";
 import { NextRequest, NextResponse } from "next/server";
 import { errorResponse, toErrorResponse, validationErrorResponse } from "@/lib/api-errors";
+import { isAdminRole } from "@/lib/utils";
 import { z } from "zod";
 
 const CreateTagSchema = z.object({
@@ -19,7 +20,7 @@ export async function GET() {
 export async function POST(req: NextRequest) {
   const session = await auth();
   if (!session) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  if (session.user.role !== "admin") {
+  if (!isAdminRole(session.user.role)) {
     return NextResponse.json({ error: "Forbidden" }, { status: 403 });
   }
 

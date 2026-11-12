@@ -9,6 +9,7 @@ import { AddEquipmentModal } from "@/components/AddEquipmentModal";
 import { UploadEquipmentModal } from "@/components/UploadEquipmentModal";
 import type { Equipment, Role } from "@/lib/types";
 import { APP_TIMEZONE, parseDueDate } from "@/lib/timezone";
+import { isAdminRole } from "@/lib/utils";
 import { useNow } from "@/lib/use-now";
 
 const EquipmentGrid = dynamic(
@@ -153,7 +154,7 @@ export function DashboardClient({ initialData, role, userName }: DashboardClient
             Download
           </Button>
 
-          {role === "admin" && (
+          {isAdminRole(role) && (
             <>
               <Button
                 variant="outline"
@@ -213,7 +214,7 @@ export function DashboardClient({ initialData, role, userName }: DashboardClient
         onRefresh={refresh}
       />
 
-      {role === "admin" && (
+      {isAdminRole(role) && (
         <>
           <AddEquipmentModal
             open={addOpen}

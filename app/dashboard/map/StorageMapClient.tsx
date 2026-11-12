@@ -31,7 +31,7 @@ import {
 } from "@/components/ui/dialog";
 import { EquipmentModal } from "@/components/EquipmentModal";
 import type { StorageCabinet, StorageMapConfigCabinet, Role } from "@/lib/types";
-import { cn } from "@/lib/utils";
+import { cn, isAdminRole } from "@/lib/utils";
 import { readErrorMessage, networkErrorMessage } from "@/lib/fetch-error";
 
 interface DraggedEquipment {
@@ -88,7 +88,7 @@ export function StorageMapClient({
   role,
   userName,
 }: StorageMapClientProps) {
-  const isAdmin = role === "admin";
+  const isAdmin = isAdminRole(role);
   const [cabinets, setCabinets] = useState<StorageCabinet[]>(initialData);
   const [selectedCabinetId, setSelectedCabinetId] = useState<string>(
     cabinets[0]?.id || ""

@@ -3,6 +3,7 @@ import { getStorageMapData, getStorageMapConfig, saveStorageMapConfig, updateEqu
 import { NextResponse } from "next/server";
 import { z } from "zod";
 import { errorResponse, readJsonBody, toErrorResponse, zodErrorMessage } from "@/lib/api-errors";
+import { isAdminRole } from "@/lib/utils";
 
 const MAX_CABINETS = 50;
 const MAX_SHELVES_PER_CABINET = 50;
@@ -77,7 +78,7 @@ export async function GET() {
     return NextResponse.json({
       cabinets,
       config,
-      isAdmin: session.user.role === "admin",
+      isAdmin: isAdminRole(session.user.role),
     });
   } catch (err: unknown) {
     return toErrorResponse(err, "Failed to load storage map");
@@ -90,7 +91,7 @@ export async function POST(req: Request) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  if (session.user.role !== "admin") {
+  if (!isAdminRole(session.user.role)) {
     return NextResponse.json(
       { error: "Forbidden: Only administrators can modify storage layout and assignments." },
       { status: 403 }

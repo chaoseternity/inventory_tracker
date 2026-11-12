@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { getResourceById, updateResource, deleteResource, getUserByEmail } from "@/lib/db";
 import { toErrorResponse, validationErrorResponse } from "@/lib/api-errors";
+import { isAdminRole } from "@/lib/utils";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -23,7 +24,7 @@ async function canModifyResource(
 ): Promise<boolean> {
   const currentUser = session.user.email ? await getUserByEmail(session.user.email) : undefined;
   const role = currentUser?.role ?? session.user.role;
-  if (role === "admin") return true;
+  if (isAdminRole(role)) return true;
   if (role !== "verified") return false;
   const userId = currentUser?.id ?? (session.user.id ? Number(session.user.id) : null);
   return userId !== null && uploadedBy !== null && userId === uploadedBy;
