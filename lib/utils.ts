@@ -7,6 +7,7 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export const ALL_ROLES: Role[] = ["developer", "admin", "verified", "viewer"];
+export const ASSIGNABLE_ROLES: Role[] = ["admin", "verified", "viewer"];
 
 export function isAdminRole(role?: string | null): boolean {
   return role === "admin" || role === "developer";

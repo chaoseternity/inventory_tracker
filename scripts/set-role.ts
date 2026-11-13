@@ -8,6 +8,7 @@
  * The user must have signed in at least once (so their row exists in the DB).
  * Accounts listed in ADMIN_EMAILS cannot be demoted (they are re-promoted on every login);
  * remove them from ADMIN_EMAILS first.
+ * The 'developer' role is assigned exclusively via config/developers.json.
  */
 
 import { getUserByEmail, updateUserRole } from "../lib/db";

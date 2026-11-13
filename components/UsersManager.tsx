@@ -5,11 +5,11 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Trash2, Pencil, Check, X } from "lucide-react";
 import type { User, Role } from "@/lib/types";
-import { roleBadgeClass, ALL_ROLES } from "@/lib/utils";
+import { roleBadgeClass, ASSIGNABLE_ROLES } from "@/lib/utils";
 import { UserLink } from "./UserLink";
 import { readErrorMessage, networkErrorMessage } from "@/lib/fetch-error";
 
-const ROLE_OPTIONS: Role[] = ALL_ROLES;
+const ROLE_OPTIONS: Role[] = ASSIGNABLE_ROLES;
 
 interface UsersManagerProps {
   users: User[];
@@ -98,6 +98,7 @@ export function UsersManager({ users: initialUsers, currentUserId }: UsersManage
             {users.map((user) => {
               const isSelf = String(user.id) === currentUserId;
               const isEditing = editing === user.id;
+              const isDev = user.role === "developer";
               return (
                 <tr key={user.id} className="h-14 hover:bg-muted/30 transition-colors">
                   <td className="px-4 align-middle">
@@ -148,7 +149,7 @@ export function UsersManager({ users: initialUsers, currentUserId }: UsersManage
                     ) : (
                       <div className="flex items-center gap-1.5">
                         <Badge className={roleBadgeClass[user.role]}>{user.role}</Badge>
-                        {!isSelf && (
+                        {!isSelf && !isDev && (
                           <Button
                             variant="ghost"
                             size="icon"
@@ -163,7 +164,7 @@ export function UsersManager({ users: initialUsers, currentUserId }: UsersManage
                     )}
                   </td>
                   <td className="px-4 align-middle text-right">
-                    {!isSelf && !isEditing && (
+                    {!isSelf && !isDev && !isEditing && (
                       <Button
                         variant="ghost"
                         size="icon"
@@ -183,7 +184,7 @@ export function UsersManager({ users: initialUsers, currentUserId }: UsersManage
         </table>
       </div>
       <p className="text-xs text-muted-foreground">
-        {users.length} user{users.length !== 1 ? "s" : ""} total. Your own account cannot be modified here.
+        {users.length} user{users.length !== 1 ? "s" : ""} total. Your own account and developer accounts cannot be modified here.
       </p>
     </div>
   );

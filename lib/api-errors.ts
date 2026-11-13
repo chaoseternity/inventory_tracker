@@ -57,6 +57,8 @@ const KNOWN_ERROR_PATTERNS: Array<[RegExp, number]> = [
 const KNOWN_ERROR_NAMES: Record<string, number> = {
   /** updateUserRole: the target is an ADMIN_EMAILS administrator and can't be demoted here. */
   ConfiguredAdminError: 403,
+  /** updateUserRole: the target is a configured developer in developers.json and can't be modified here. */
+  ConfiguredDeveloperError: 403,
   /** createReservation: invalid times/notes, unavailable or unknown equipment. */
   ReservationValidationError: 400,
   /** saveStorageMapConfig: malformed cabinets configuration. */

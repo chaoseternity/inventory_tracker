@@ -43,6 +43,7 @@ import type {
 } from "./types";
 import { sendDeploymentInvitationEmail, sendOverdueReminderEmail } from "./email";
 import { sendClubWebhook } from "./webhook";
+import developersConfig from "@/config/developers.json";
 
 function getAdminEmails(): Set<string> {
   const raw = process.env.ADMIN_EMAILS ?? "";
@@ -57,9 +58,49 @@ export function isConfiguredAdminEmail(email: string | null | undefined): boolea
   return getAdminEmails().has(email.trim().toLowerCase());
 }
 
+export function getDeveloperEmails(): Set<string> {
+  const set = new Set<string>();
+  const rawList: unknown = Array.isArray(developersConfig)
+    ? developersConfig
+    : (developersConfig as { developers?: unknown[]; emails?: unknown[] })?.developers ??
+      (developersConfig as { developers?: unknown[]; emails?: unknown[] })?.emails ??
+      [];
+
+  if (Array.isArray(rawList)) {
+    for (const item of rawList) {
+      if (typeof item === "string" && item.trim()) {
+        set.add(item.trim().toLowerCase());
+      }
+    }
+  }
+
+  const envRaw = process.env.DEVELOPER_EMAILS ?? "";
+  if (envRaw) {
+    for (const e of envRaw.split(",")) {
+      if (e.trim()) set.add(e.trim().toLowerCase());
+    }
+  }
+
+  return set;
+}
+
+/** True if the email is listed in developers.json (such accounts are assigned the developer role). */
+export function isConfiguredDeveloperEmail(email: string | null | undefined): boolean {
+  if (!email) return false;
+  return getDeveloperEmails().has(email.trim().toLowerCase());
+}
+
 // ---------------------------------------------------------------------------
 // Error types (route handlers can map these to 4xx responses)
 // ---------------------------------------------------------------------------
+
+/** updateUserRole: the target account is listed in developers.json and cannot be modified here. */
+export class ConfiguredDeveloperError extends Error {
+  constructor(message = "This account is a configured developer in developers.json and cannot be modified here.") {
+    super(message);
+    this.name = "ConfiguredDeveloperError";
+  }
+}
 
 /** updateUserRole: the target account is listed in ADMIN_EMAILS and cannot be demoted. */
 export class ConfiguredAdminError extends Error {
@@ -429,11 +470,25 @@ export async function upsertUser(params: {
   await ensureSchema();
   const normalizedEmail = params.email.trim().toLowerCase();
   const existing = await getUserByEmail(normalizedEmail);
+  const isDevEmail = isConfiguredDeveloperEmail(normalizedEmail);
   const adminEmails = getAdminEmails();
   const isAdminEmail = adminEmails.has(normalizedEmail);
 
   if (existing) {
-    const newRole = params.role ?? (isAdminEmail && !isAdminRole(existing.role) ? "admin" : existing.role);
+    let newRole: Role;
+    if (isDevEmail) {
+      newRole = "developer";
+    } else if (existing.role === "developer" && !isDevEmail) {
+      // Demote if no longer in developers.json
+      newRole = isAdminEmail ? "admin" : (params.role ?? "viewer");
+    } else if (params.role) {
+      newRole = params.role;
+    } else if (isAdminEmail && !isAdminRole(existing.role)) {
+      newRole = "admin";
+    } else {
+      newRole = existing.role;
+    }
+
     const newImage = params.image ?? existing.image;
     await sql`
       UPDATE users
@@ -447,9 +502,16 @@ export async function upsertUser(params: {
     return (await getUserById(existing.id))!;
   }
 
-  // Admins come only from ADMIN_EMAILS or scripts/set-role.ts. (The first account to sign in is
-  // NOT made admin: on a fresh deployment that would hand the site to whoever logs in first.)
-  const role: Role = params.role ?? (isAdminEmail ? "admin" : "viewer");
+  // Developer role comes from developers.json.
+  // Admins come only from ADMIN_EMAILS or scripts/set-role.ts.
+  let role: Role = "viewer";
+  if (isDevEmail) {
+    role = "developer";
+  } else if (params.role) {
+    role = params.role;
+  } else if (isAdminEmail) {
+    role = "admin";
+  }
 
   const { rows } = await sql<User>`
     INSERT INTO users (name, email, google_id, image, role, provider)
@@ -473,6 +535,15 @@ export async function updateUserRole(id: number, role: Role): Promise<{ success:
   const user = await getUserById(id);
   if (!user) {
     return { success: false, error: "User not found" };
+  }
+  if (role === "developer") {
+    return {
+      success: false,
+      error: "The developer role cannot be assigned via the website. Configure it in developers.json.",
+    };
+  }
+  if (isConfiguredDeveloperEmail(user.email)) {
+    throw new ConfiguredDeveloperError();
   }
   if (!isAdminRole(role) && isConfiguredAdminEmail(user.email)) {
     // upsertUser re-promotes ADMIN_EMAILS accounts on every login, so a demotion here would
@@ -503,6 +574,12 @@ export async function deleteUser(id: number): Promise<{ success: boolean; error?
   const user = await getUserById(id);
   if (!user) {
     return { success: false, error: "User not found" };
+  }
+  if (isConfiguredDeveloperEmail(user.email)) {
+    return {
+      success: false,
+      error: "This account is a configured developer in developers.json and cannot be deleted here.",
+    };
   }
   if (isAdminRole(user.role)) {
     const adminCount = await countAdmins();

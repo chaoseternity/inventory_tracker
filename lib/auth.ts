@@ -1,7 +1,7 @@
 import NextAuth from "next-auth";
 import { cache } from "react";
 import { authConfig } from "@/auth.config";
-import { upsertUser, getUserByEmail } from "./db";
+import { upsertUser, getUserByEmail, isConfiguredDeveloperEmail } from "./db";
 import type { Role } from "./types";
 
 /** Optional domain restriction for Microsoft sign-ins (set MICROSOFT_ALLOWED_DOMAIN in env, or empty to allow all). */
@@ -66,13 +66,14 @@ const nextAuth = NextAuth({
       // Re-read role from DB on every token evaluation so that admin-changed
       // roles take effect on the user's next page navigation without re-login.
       if (!token.email) return token;
+      const isDev = isConfiguredDeveloperEmail(token.email);
       const dbUser = await getUserByEmail(token.email);
       if (!dbUser) {
         token.userId = "";
-        token.role = "viewer";
+        token.role = isDev ? "developer" : "viewer";
         return token;
       }
-      token.role = dbUser.role ?? "viewer";
+      token.role = isDev ? "developer" : (dbUser.role === "developer" ? "admin" : (dbUser.role ?? "viewer"));
       token.userId = String(dbUser.id);
       token.name = dbUser.name ?? token.name;
       token.email = dbUser.email;

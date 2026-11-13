@@ -5,7 +5,7 @@ import { resultErrorResponse, toErrorResponse, validationErrorResponse } from "@
 import { isAdminRole } from "@/lib/utils";
 import { z } from "zod";
 
-const UpdateUserSchema = z.object({ role: z.enum(["developer", "admin", "verified", "viewer"]) });
+const UpdateUserSchema = z.object({ role: z.enum(["admin", "verified", "viewer"]) });
 
 export async function PUT(
   req: NextRequest,
